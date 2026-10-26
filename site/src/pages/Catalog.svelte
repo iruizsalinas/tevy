@@ -142,7 +142,7 @@
     <label class="search">
       <Icon name="search" size={15} />
       <span class="sr-only">Search {home ? 'everything' : plural}</span>
-      <input bind:this={search} bind:value={query} type="search" placeholder="Search {home ? 'everything' : plural}" autocomplete="off" spellcheck="false" />
+      <input bind:this={search} bind:value={query} type="search" name="search" placeholder="Search {home ? 'everything' : plural}" autocomplete="off" spellcheck="false" />
       {#if !query}<kbd aria-hidden="true">/</kbd>{/if}
     </label>
     <p class="count mono" aria-live="polite">
