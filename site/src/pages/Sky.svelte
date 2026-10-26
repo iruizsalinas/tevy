@@ -101,11 +101,6 @@
           </li>
         {/each}
       </ul>
-      <p class="fine">
-        Equirectangular {formatLabel(main.format)}: a JPEG with an HDR gain map, so it opens as a normal
-        image too.
-        <a class="mono" href="/skies/{sky.slug}.json">{sky.slug}.json</a>
-      </p>
     </section>
 
     {#if older.length}
@@ -291,17 +286,6 @@
   }
 
   .links a {
-    color: var(--muted);
-    text-underline-offset: 3px;
-  }
-
-  .fine {
-    margin: 8px 0 0;
-    font-size: 12px;
-    color: var(--faint);
-  }
-
-  .fine a {
     color: var(--muted);
     text-underline-offset: 3px;
   }

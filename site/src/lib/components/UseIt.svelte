@@ -4,7 +4,7 @@
   import { SITE_URL } from '#lib/models';
   import Icon from './Icon.svelte';
 
-  // The two URLs of a file, pinned and latest, with a pointer to the docs for loader setup.
+  // The two URLs of a file, pinned and latest.
   let { path, version }: { path: string; version: number } = $props();
 
   const rows = $derived([
@@ -41,9 +41,6 @@
       </li>
     {/each}
   </ul>
-  <p>
-    Loader setup for three.js and other engines, and when to pin: <a href="/docs">Docs</a>
-  </p>
 </div>
 
 <style>
@@ -94,16 +91,5 @@
   button {
     grid-column: 2;
     grid-row: 1 / span 2;
-  }
-
-  p {
-    margin: 8px 0 0;
-    font-size: 13px;
-    color: var(--muted);
-  }
-
-  a {
-    color: var(--accent-text);
-    text-underline-offset: 3px;
   }
 </style>

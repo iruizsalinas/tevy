@@ -116,10 +116,6 @@
           </li>
         {/each}
       </ul>
-      <p class="fine">
-        GLB with meshopt geometry and KTX2 textures, in meters.
-        <a class="mono" href="/models/{model.slug}.json">{model.slug}.json</a>
-      </p>
     </section>
 
     {#if older.length}
@@ -305,17 +301,6 @@
   }
 
   .links a {
-    color: var(--muted);
-    text-underline-offset: 3px;
-  }
-
-  .fine {
-    margin: 8px 0 0;
-    font-size: 12px;
-    color: var(--faint);
-  }
-
-  .fine a {
     color: var(--muted);
     text-underline-offset: 3px;
   }
