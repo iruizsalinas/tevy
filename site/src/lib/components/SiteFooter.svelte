@@ -2,10 +2,9 @@
   import { CC0_URL } from '#lib/models';
 </script>
 
-<footer id="license">
+<footer>
   <p>
-    Every model on tevy.dev is <a href={CC0_URL} rel="license">CC0 1.0</a>: public domain, free for any use, no attribution
-    required. Site code is MIT.
+    Models <a href={CC0_URL} rel="license">CC0 1.0</a>, site code MIT. <a href="/license/">License</a>
   </p>
   <p class="links mono">
     <a href="/models.json">models.json</a>
@@ -20,11 +19,12 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 8px 24px;
+    gap: 6px 24px;
     margin-top: auto;
-    padding: 18px 16px 22px;
+    padding: 12px 16px;
     border-top: 1px solid var(--line);
     font-size: 12.5px;
+    line-height: 1.4;
     color: var(--faint);
   }
 

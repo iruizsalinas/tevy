@@ -5,7 +5,9 @@ import { render } from 'svelte/server';
 import { readModels } from '#lib/server/models';
 import { llmsTxt, modelsJson, robotsTxt, sitemapXml } from '#lib/server/files';
 import { modelUrl } from '#lib/models';
+import Catalog from './pages/Catalog.svelte';
 import Home from './pages/Home.svelte';
+import License from './pages/License.svelte';
 import Missing from './pages/Missing.svelte';
 import Model from './pages/Model.svelte';
 
@@ -37,6 +39,8 @@ export function outputs(): Output[] {
   const models = readModels();
   return [
     { path: '/', file: 'index.html', page: () => page(Home, 'home', { models }) },
+    { path: '/models/', file: 'models/index.html', page: () => page(Catalog, 'catalog', { models }) },
+    { path: '/license/', file: 'license/index.html', page: () => page(License, 'license', {}) },
     ...models.map((model) => {
       const path = modelUrl(model);
       return { path, file: `${path.slice(1)}index.html`, page: () => page(Model, 'model', { model }) };

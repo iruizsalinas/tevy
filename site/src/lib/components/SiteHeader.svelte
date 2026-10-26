@@ -6,8 +6,8 @@
 <header class="nav">
   <a href="/" class="home" aria-label="tevy home"><Logo size={26} track /><span class="word display">tevy</span></a>
   <span class="spacer"></span>
-  <a class="btn ghost small" href="/">Models</a>
-  <a class="btn ghost small" href="/#license">License</a>
+  <a class="btn ghost small" href="/models/">Models</a>
+  <a class="btn ghost small" href="/license/">License</a>
 </header>
 
 <style>

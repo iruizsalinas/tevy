@@ -1,77 +1,23 @@
 <script lang="ts">
   import Layout from './Layout.svelte';
-  import { onMount } from 'svelte';
-  import { SITE_URL, categoryLabel, type Model } from '#lib/models';
-  import Icon from '#lib/components/Icon.svelte';
+  import { SITE_URL, categoryLabel, loadSnippet, lod0, type Model } from '#lib/models';
+  import CodeBlock from '#lib/components/CodeBlock.svelte';
   import ModelCard from '#lib/components/ModelCard.svelte';
-  import Segmented from '#lib/components/Segmented.svelte';
 
-  let { models: built }: { models: Model[] } = $props();
+  let { models }: { models: Model[] } = $props();
 
-  // Newer list from /models.json, if it differs from the one this page was built with.
-  let fetched = $state<Model[] | null>(null);
-  const models = $derived(fetched ?? built);
-  let category = $state('');
-  let query = $state('');
-  let ready = $state(false);
-  let search = $state<HTMLInputElement>();
-
-  const categories = $derived([
-    { value: '', label: 'All' },
-    ...[...new Set(models.map((m) => m.category))].sort().map((c) => ({ value: c, label: categoryLabel(c) })),
-  ]);
-
-  const shown = $derived.by(() => {
-    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-    return models.filter((m) => {
-      if (category && m.category !== category) return false;
-      const hay = [m.name, m.slug, m.category, ...(m.tags ?? [])].join(' ').toLowerCase();
-      return terms.every((t) => hay.includes(t));
-    });
-  });
-
-  onMount(() => {
-    const params = new URLSearchParams(location.search);
-    category = params.get('category') ?? '';
-    query = params.get('q') ?? '';
-    ready = true;
-
-    // Pick up models published after this page was built.
-    fetch('/models.json', { cache: 'no-cache' })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((index) => {
-        if (!index || !Array.isArray(index.models)) return;
-        const key = (list: Model[]) => list.map((m) => `${m.slug}@${m.revision ?? 0}`).join();
-        if (key(index.models) !== key(models)) fetched = index.models;
-      })
-      .catch(() => {});
-  });
-
-  // Keep the filters in the address bar so filtered views can be shared.
-  $effect(() => {
-    const params = new URLSearchParams();
-    if (category) params.set('category', category);
-    if (query.trim()) params.set('q', query.trim());
-    if (!ready) return;
-    const qs = params.toString();
-    history.replaceState(history.state, '', qs ? `?${qs}` : location.pathname);
-  });
-
-  function clear() {
-    category = '';
-    query = '';
-  }
-
-  function onkeydown(event: KeyboardEvent) {
-    const target = event.target as HTMLElement;
-    if (event.key === '/' && !target.closest('input, textarea')) {
-      event.preventDefault();
-      search?.focus();
-    }
-  }
+  const latest = $derived(
+    [...models].sort((a, b) => (b.created ?? '').localeCompare(a.created ?? '') || a.slug.localeCompare(b.slug)).slice(0, 8),
+  );
+  const categories = $derived(
+    [...new Set(models.map((m) => m.category))].sort().map((c) => ({
+      value: c,
+      label: categoryLabel(c),
+      count: models.filter((m) => m.category === c).length,
+    })),
+  );
+  const example = $derived(models.find((m) => m.slug === 'norway-spruce') ?? models[0]);
 </script>
-
-<svelte:window {onkeydown} />
 
 <svelte:head>
   <title>tevy: free CC0 3D models for the web</title>
@@ -90,180 +36,143 @@
 </svelte:head>
 
 <Layout>
+  <div class="home">
+    <header class="intro">
+      <h1 class="display">Free 3D models, sized for the browser</h1>
+      <p>CC0 glTF with LODs, meshopt geometry and KTX2 textures. No account, no attribution.</p>
+      <div class="actions">
+        <a class="btn primary" href="/models/">Browse all {models.length} models</a>
+        <a class="btn" href="/license/">What CC0 means</a>
+      </div>
+      {#if categories.length > 1}
+        <ul class="categories">
+          {#each categories as c (c.value)}
+            <li><a class="pill" href="/models/?category={encodeURIComponent(c.value)}">{c.label} <span class="mono">{c.count}</span></a></li>
+          {/each}
+        </ul>
+      {/if}
+    </header>
 
-<div class="catalog">
-  <header class="intro">
-    <h1 class="display">Free 3D models, sized for the browser</h1>
-    <p>CC0 glTF with LODs, meshopt geometry and KTX2 textures. No account, no attribution.</p>
-  </header>
+    <section>
+      <div class="section-head">
+        <h2>Latest models</h2>
+        <a href="/models/">View all</a>
+      </div>
+      <ul class="grid">
+        {#each latest as model, i (model.slug)}
+          <li><ModelCard {model} eager={i < 4} /></li>
+        {/each}
+      </ul>
+    </section>
 
-  <div class="toolbar">
-    {#if categories.length > 2}
-      <Segmented bind:value={category} choices={categories} label="Category" />
+    {#if example}
+      <section class="use">
+        <div class="section-head">
+          <h2>Load one in three.js</h2>
+        </div>
+        <p>Every file is a plain HTTPS download, so you can load models straight from tevy.dev or copy them into your project.</p>
+        <CodeBlock title="JavaScript" code={loadSnippet(lod0(example))} />
+      </section>
     {/if}
-    <label class="search">
-      <Icon name="search" size={15} />
-      <span class="sr-only">Search models</span>
-      <input bind:this={search} bind:value={query} type="search" placeholder="Search models" autocomplete="off" spellcheck="false" />
-      {#if !query}<kbd aria-hidden="true">/</kbd>{/if}
-    </label>
-    <p class="count mono" aria-live="polite">{shown.length} model{shown.length === 1 ? '' : 's'}</p>
   </div>
-
-  <h2 class="sr-only">All models</h2>
-  {#if shown.length}
-    <ul class="grid">
-      {#each shown as model, i (model.slug)}
-        <li><ModelCard {model} eager={i < 8} /></li>
-      {/each}
-    </ul>
-  {:else}
-    <div class="empty">
-      <p>No models match your search.</p>
-      <button type="button" class="btn" onclick={clear}>Clear filters</button>
-    </div>
-  {/if}
-</div>
-
 </Layout>
 
 <style>
-  .catalog {
+  .home {
     max-width: 1480px;
     margin: 0 auto;
-    padding: 0 clamp(16px, 3vw, 32px) 56px;
+    padding: 0 clamp(16px, 3vw, 32px) 40px;
   }
 
   .intro {
-    padding: clamp(24px, 4vw, 44px) 0 clamp(12px, 2vw, 20px);
+    padding: clamp(28px, 5vw, 56px) 0 clamp(20px, 3vw, 32px);
   }
 
   h1 {
-    font-size: clamp(28px, 4.2vw, 46px);
-    line-height: 1.05;
+    max-width: 16ch;
+    font-size: clamp(30px, 4.6vw, 52px);
+    line-height: 1.04;
   }
 
   .intro p {
-    margin: 8px 0 0;
+    margin: 10px 0 0;
     color: var(--muted);
-    font-size: 15px;
+    font-size: 15.5px;
   }
 
-  .toolbar {
-    position: sticky;
-    top: 56px;
-    z-index: 20;
+  .actions {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 0;
-    background: var(--bg);
+    gap: 8px;
+    margin-top: 20px;
   }
 
-  .search {
-    position: relative;
-    flex: 0 1 280px;
-    min-width: 0;
-    margin-left: auto;
-    color: var(--faint);
+  .categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
   }
 
-  .search :global(.icon) {
-    position: absolute;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
+  .categories a {
+    text-decoration: none;
   }
 
-  input {
-    width: 100%;
-    height: 32px;
-    padding: 0 30px 0 32px;
-    border: 1px solid var(--line-strong);
-    border-radius: 7px;
-    background: var(--canvas);
-    font-size: 13.5px;
-    outline: none;
-    transition:
-      border-color 0.12s,
-      background 0.12s;
-  }
-
-  input::placeholder {
-    color: var(--faint);
-  }
-
-  input:focus {
+  .categories a:hover {
     border-color: var(--accent-line);
-    background: var(--panel);
+    color: var(--text);
   }
 
-  input::-webkit-search-cancel-button {
-    display: none;
-  }
-
-  kbd {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: grid;
-    place-items: center;
-    width: 18px;
-    height: 18px;
-    border: 1px solid var(--line-strong);
-    border-radius: 4px;
-    font-family: var(--mono);
-    font-size: 11px;
-    pointer-events: none;
-  }
-
-  .count {
-    margin: 0;
-    font-size: 12px;
+  .categories .mono {
     color: var(--faint);
-    white-space: nowrap;
+    font-size: 11px;
+  }
+
+  section {
+    margin-top: 12px;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-size: 17px;
+  }
+
+  .section-head a {
+    color: var(--muted);
+    font-size: 13px;
+    text-underline-offset: 3px;
   }
 
   .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
     gap: 12px;
-    margin: 4px 0 0;
+    margin: 0;
     padding: 0;
     list-style: none;
   }
 
-  .empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    padding: 64px 0;
-    color: var(--muted);
+  .use {
+    max-width: 860px;
+    margin-top: 40px;
   }
 
-  .empty p {
-    margin: 0;
+  .use p {
+    margin: 0 0 12px;
+    color: var(--muted);
+    font-size: 14px;
   }
 
   @media (max-width: 640px) {
-    .toolbar {
-      gap: 8px;
-    }
-
-    .search {
-      flex: 1 1 100%;
-      order: -1;
-      margin-left: 0;
-    }
-
-    .count {
-      margin-left: auto;
-    }
-
     .grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
