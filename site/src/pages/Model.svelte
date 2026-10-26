@@ -6,6 +6,7 @@
     categoryLabel,
     downloadName,
     formatBytes,
+    formatClips,
     formatDimensions,
     lod0,
     modelUrl,
@@ -84,6 +85,15 @@
       <div><dt>LODs</dt><dd class="mono">{model.files.length}</dd></div>
       <div><dt>License</dt><dd class="mono"><a href={CC0_URL} rel="license">CC0 1.0</a></dd></div>
       <div class="wide"><dt>Dimensions</dt><dd class="mono">{formatDimensions(model.dimensions) || '-'}</dd></div>
+      {#if model.parts?.length}
+        <div class="wide"><dt>Moving parts</dt><dd class="mono">{model.parts.join(', ')}</dd></div>
+      {/if}
+      {#if model.animations?.length}
+        <div class="wide"><dt>Animations</dt><dd class="mono">{formatClips(model.animations)}</dd></div>
+      {/if}
+      {#if model.wind}
+        <div class="wide"><dt>Wind</dt><dd>Sway and flutter data for a wind shader, see the <a href="/docs#motion">docs</a></dd></div>
+      {/if}
       <div class="wide">
         <dt>Version</dt>
         <dd class="mono">v{model.version}{#if model.updated}, <time datetime={model.updated}>{model.updated}</time>{/if}</dd>

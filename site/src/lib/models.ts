@@ -42,7 +42,12 @@ export interface Model {
   up?: string;
   forward?: string;
   dimensions?: { x: number; y: number; z: number };
+  /** Moving parts: nodes with their origin at the pivot, such as wheel_FL. */
   parts?: string[];
+  /** Animation clips in the file, with their length in seconds. */
+  animations?: { name: string; duration: number }[];
+  /** True when the meshes carry the _WIND vertex attribute for wind sway. */
+  wind?: boolean;
   preview: string;
   files: ModelFile[];
   /** Every version, newest first. */
@@ -60,6 +65,11 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export function categoryLabel(category: string): string {
   return CATEGORY_LABELS[category] ?? category.charAt(0).toUpperCase() + category.slice(1).replace(/-/g, ' ');
+}
+
+/** "idle 5 s, walk 1 s": the clips of a model with their rounded length. */
+export function formatClips(clips: { name: string; duration: number }[]): string {
+  return clips.map((c) => `${c.name} ${Number(c.duration.toFixed(1))} s`).join(', ');
 }
 
 export function formatBytes(bytes: number): string {

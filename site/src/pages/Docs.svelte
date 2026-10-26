@@ -6,9 +6,11 @@
   import type { Material } from '#lib/materials';
   import {
     THREE_PARTS_SNIPPET,
+    THREE_WIND_SNIPPET,
     babylonSnippet,
     modelViewerSnippet,
     r3fSnippet,
+    threeAnimationSnippet,
     threeLodSnippet,
     threeMaterialSnippet,
     threeModelSnippet,
@@ -19,7 +21,7 @@
 
   // How to use tevy files, once for every item: URLs, versions, and code for three.js and other
   // engines. The examples use a real model, sky and material so they can be pasted as they are.
-  let { model, sky, material }: { model: Model; sky: Sky | null; material: Material | null } = $props();
+  let { model, sky, material, person }: { model: Model; sky: Sky | null; material: Material | null; person: Model | null } = $props();
 
   const pinned = $derived(`${SITE_URL}${lod0(model).path}`);
   const latest = $derived(`${SITE_URL}${latestPath(lod0(model).path)}`);
@@ -34,6 +36,7 @@
     ['three-models', 'three.js: models'],
     ['three-skies', 'three.js: skies'],
     ['three-materials', 'three.js: materials'],
+    ['motion', 'Moving parts, animation and wind'],
     ['other', 'Other engines'],
     ['metadata', 'Metadata and indexes'],
   ];
@@ -145,12 +148,8 @@
         <h3>Levels of detail</h3>
         <p>Load each level into a <span class="mono">LOD</span> object and three.js shows the right one for the camera distance.</p>
         <CodeBlock title="Switch levels by distance" code={threeLodSnippet(versionBase, model.files.length)} />
-        <h3>Units and moving parts</h3>
-        <p>
-          Units are meters, +Y is up and the front faces +Z. Moving pieces such as wheels, doors and steering wheels are separate nodes with
-          their origin at the pivot and stable names, listed in <span class="mono">parts</span> in the model's metadata.
-        </p>
-        <CodeBlock title="Turn a wheel" code={THREE_PARTS_SNIPPET} />
+        <h3>Units</h3>
+        <p>Units are meters, +Y is up and the front faces +Z.</p>
       </section>
 
       {#if sky}
@@ -184,6 +183,40 @@
           </p>
         </section>
       {/if}
+
+      <section id="motion">
+        <h2 tabindex="-1">Moving parts, animation and wind</h2>
+        <p>
+          A model's metadata says what can move: <span class="mono">parts</span> lists its moving nodes,
+          <span class="mono">animations</span> its animation clips, and <span class="mono">wind</span> is true when it carries wind data.
+          Each model page shows the same.
+        </p>
+        <h3>Moving parts</h3>
+        <p>
+          Wheels, steering wheels and similar pieces are separate nodes with their origin at the pivot and stable names, such as
+          <span class="mono">wheel_FL</span> (front left; a model's left is +X). Wheels spin around the car's X axis, the axle, and the front
+          wheels steer around Y. Small parts such as a steering wheel can be
+          left out of the lower levels of detail.
+        </p>
+        <CodeBlock title="Drive the wheels" code={THREE_PARTS_SNIPPET} />
+        {#if person}
+          <h3>Animated people</h3>
+          <p>
+            People are skinned meshes on one shared 55-joint skeleton, with their clips in the same file: <span class="mono">idle</span>,
+            <span class="mono">walk</span>, <span class="mono">wave</span> and <span class="mono">look_around</span>. Every level of detail keeps
+            the skeleton and the clips. Joint names are stable, so you can attach things to them, such as a bag to
+            <span class="mono">hand_R</span>.
+          </p>
+          <CodeBlock title="Play a walk" code={threeAnimationSnippet(`${SITE_URL}${lod0(person).path}`)} />
+        {/if}
+        <h3>Wind</h3>
+        <p>
+          Trees and plants carry a <span class="mono">_WIND</span> vertex attribute: how far each vertex sways, a phase so branches do not move
+          in step, and how much leaves flutter. A few lines in the vertex shader make them move; tune the numbers to the wind you want. Shadows
+          use their own material, so they stay still unless you patch <span class="mono">customDepthMaterial</span> the same way.
+        </p>
+        <CodeBlock title="Sway in the wind" code={THREE_WIND_SNIPPET} />
+      </section>
 
       <section id="other">
         <h2 tabindex="-1">Other engines</h2>

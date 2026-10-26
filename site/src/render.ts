@@ -62,10 +62,12 @@ function docsExamples(all: Record<Kind, Item[]>) {
   const model = picks.find((i) => i.kind === 'models') ?? all.models[0];
   const sky = picks.find((i) => i.kind === 'skies') ?? all.skies[0] ?? null;
   const material = picks.find((i) => i.kind === 'materials') ?? all.materials[0] ?? null;
+  const person = (all.models as Model[]).find((m) => m.animations?.length) ?? null;
   return {
     model: published(model) as Model,
     sky: sky ? (published(sky) as Sky) : null,
     material: material ? (published(material) as Material) : null,
+    person: person ? (published(person as Item) as Model) : null,
   };
 }
 
