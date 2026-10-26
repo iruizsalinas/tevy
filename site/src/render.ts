@@ -5,6 +5,8 @@ import { render } from 'svelte/server';
 import { KINDS, itemUrl, latestPath, type Item, type Kind } from '#lib/catalog';
 import type { Model } from '#lib/models';
 import type { Sky } from '#lib/skies';
+import type { Material } from '#lib/materials';
+import { mainFile } from '#lib/skies';
 import { featured, published, readAll, verifyFiles } from '#lib/server/catalog';
 import { indexJson, llmsTxt, robotsTxt, sitemapXml } from '#lib/server/files';
 import Catalog from './pages/Catalog.svelte';
@@ -13,6 +15,7 @@ import License from './pages/License.svelte';
 import Missing from './pages/Missing.svelte';
 import ModelPage from './pages/Model.svelte';
 import SkyPage from './pages/Sky.svelte';
+import MaterialPage from './pages/Material.svelte';
 
 /** A page: rendered Svelte markup plus the client entry (site/src/client/<entry>.ts) that hydrates it. */
 export interface Page {
@@ -42,16 +45,28 @@ function page<P extends Record<string, unknown>>(component: Component<P>, entry:
   return { head, body, entry, props };
 }
 
-function itemPage(item: Item): Page {
-  return item.kind === 'models' ? page(ModelPage, 'model', { model: item }) : page(SkyPage, 'sky', { sky: item });
+// The sky that lights the material viewer: plain daylight, so the material shows its own color.
+const MATERIAL_SKY = 'scattered-cumulus';
+
+function itemPage(item: Item, all: Record<Kind, Item[]>): Page {
+  if (item.kind === 'models') return page(ModelPage, 'model', { model: item });
+  if (item.kind === 'skies') return page(SkyPage, 'sky', { sky: item });
+  const sky = (all.skies.find((s) => s.slug === MATERIAL_SKY) ?? all.skies[0]) as Sky | undefined;
+  const lighting = sky ? { path: mainFile(sky).path, exposure: sky.exposure, sun: sky.sun } : null;
+  return page(MaterialPage, 'material', { material: item, sky: lighting });
 }
 
-/** The model and sky the docs use in their examples: the first featured of each. */
+/** The model, sky and material the docs use in their examples: the first featured of each. */
 function docsExamples(all: Record<Kind, Item[]>) {
   const picks = featured(all);
   const model = picks.find((i) => i.kind === 'models') ?? all.models[0];
   const sky = picks.find((i) => i.kind === 'skies') ?? all.skies[0] ?? null;
-  return { model: published(model) as Model, sky: sky ? (published(sky) as Sky) : null };
+  const material = picks.find((i) => i.kind === 'materials') ?? all.materials[0] ?? null;
+  return {
+    model: published(model) as Model,
+    sky: sky ? (published(sky) as Sky) : null,
+    material: material ? (published(material) as Material) : null,
+  };
 }
 
 export function outputs(): Output[] {
@@ -64,7 +79,7 @@ export function outputs(): Output[] {
       { path: `/${kind}`, file: `${kind}/index.html`, page: () => page(Catalog, 'catalog', { items: all[kind], kind, sections: counts }) },
       ...all[kind].map((item) => {
         const path = itemUrl(item);
-        return { path, file: `${path.slice(1)}/index.html`, page: () => itemPage(item) };
+        return { path, file: `${path.slice(1)}/index.html`, page: () => itemPage(item, all) };
       }),
       // The latest version's files at unversioned URLs, for sites that follow new versions.
       ...all[kind].flatMap((item) =>

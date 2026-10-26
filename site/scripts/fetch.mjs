@@ -8,7 +8,7 @@ import { dirname, join, resolve } from 'node:path';
 
 const base = (process.argv[2] ?? 'https://tevy.dev').replace(/\/$/, '');
 const publicDir = resolve(import.meta.dirname, '..', 'public');
-const SECTIONS = ['models', 'skies'];
+const SECTIONS = ['models', 'skies', 'materials'];
 
 async function get(path) {
   const res = await fetch(base + path);

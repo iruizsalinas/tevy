@@ -8,7 +8,7 @@
   import ItemCard from '#lib/components/ItemCard.svelte';
   import Segmented from '#lib/components/Segmented.svelte';
 
-  // One catalog page for the featured home page (kind null) and every section (/models, /skies).
+  // One catalog page for the featured home page (kind null) and every section (/models, /skies, /materials).
   // The tabs link between them; a section page also filters by category. Searching on the home
   // page searches every section.
   let {
@@ -21,11 +21,11 @@
   const home = $derived(!kind);
   const noun = $derived(info ? info.singular : 'item');
   const plural = $derived(info ? info.label.toLowerCase() : 'items');
-  const title = $derived(info ? info.title : 'Free 3D models and HDR skies for the web');
+  const title = $derived(info ? info.title : 'Free 3D models, HDR skies and PBR materials for the web');
   const description = $derived(
     info
       ? `Browse every free CC0 ${noun} on tevy. ${info.blurb}`
-      : 'Free 3D models and HDR skies made for the browser: cars, trees, rocks, buildings and road props with levels of detail, ready for three.js and any glTF engine. Everything is CC0, free for any use.',
+      : 'Free 3D models, HDR skies and PBR materials made for the browser: cars, trees, buildings and road props with levels of detail, plus seamless ground textures. Everything is CC0, ready for three.js and any glTF engine.',
   );
 
   // Newer list from /<kind>.json, if it differs from the one this page was built with.
@@ -118,7 +118,7 @@
 <div class="catalog">
   <header class="intro">
     <h1 class="display">{info ? info.label : 'Free assets for the web'}</h1>
-    <p>{info ? info.blurb : 'Browser-sized 3D models and HDR skies for three.js and any glTF engine, CC0 for any use.'}</p>
+    <p>{info ? info.blurb : 'Browser-sized 3D models, HDR skies and PBR materials for three.js and any glTF engine, CC0 for any use.'}</p>
   </header>
 
   <div class="toolbar">

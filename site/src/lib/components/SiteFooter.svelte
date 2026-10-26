@@ -9,6 +9,7 @@
   <p class="links mono">
     <a href="/models.json">models.json</a>
     <a href="/skies.json">skies.json</a>
+    <a href="/materials.json">materials.json</a>
     <a href="/llms.txt">llms.txt</a>
     <a href="/sitemap.xml">sitemap.xml</a>
   </p>

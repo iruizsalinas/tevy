@@ -64,6 +64,36 @@ renderer.toneMapping = AgXToneMapping;
 renderer.toneMappingExposure = ${sky.exposure ?? 1};${light}`;
 }
 
+/** `base` is the version folder, e.g. https://tevy.dev/materials/<slug>/v1 */
+export function threeMaterialSnippet(base: string, tileSize: number): string {
+  return `import { MeshStandardMaterial, RepeatWrapping, SRGBColorSpace } from 'three';
+import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
+
+// Once per app (the same loader the models use).
+const ktx2 = new KTX2Loader()
+  .setTranscoderPath('${TRANSCODER_URL}')
+  .detectSupport(renderer);
+
+const [color, normal, orm] = await Promise.all(
+  ['color', 'normal', 'orm'].map((map) => ktx2.loadAsync(\`${base}/\${map}-2k.ktx2\`)),
+);
+color.colorSpace = SRGBColorSpace;
+
+// One repeat covers ${tileSize} m. Repeat it over a plane of size width x depth in meters.
+for (const texture of [color, normal, orm]) {
+  texture.wrapS = texture.wrapT = RepeatWrapping;
+  texture.repeat.set(width / ${tileSize}, depth / ${tileSize});
+}
+
+const material = new MeshStandardMaterial({
+  map: color,
+  normalMap: normal,
+  aoMap: orm, // occlusion in red
+  roughnessMap: orm, // roughness in green
+  metalnessMap: orm, // metalness in blue
+});`;
+}
+
 export function modelViewerSnippet(url: string): string {
   return `<script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.0.0/dist/model-viewer.min.js"></script>
 

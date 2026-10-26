@@ -8,6 +8,7 @@ const entries = {
   license: 'site/src/client/license.ts',
   model: 'site/src/client/model.ts',
   sky: 'site/src/client/sky.ts',
+  material: 'site/src/client/material.ts',
   docs: 'site/src/client/docs.ts',
   missing: 'site/src/client/missing.ts',
 };

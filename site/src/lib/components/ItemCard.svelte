@@ -2,13 +2,15 @@
   import { cardMeta, itemUrl, type Item } from '#lib/catalog';
 
   let { item, eager = false }: { item: Item; eager?: boolean } = $props();
+
+  const KIND_ALT = { models: '3D model', skies: 'sky panorama', materials: 'material' };
 </script>
 
-<a class="card" class:sky={item.kind === 'skies'} href={itemUrl(item)}>
+<a class="card" class:fill={item.kind !== 'models'} href={itemUrl(item)}>
   <span class="media">
     <img
       src={item.preview}
-      alt="{item.name}, {item.kind === 'skies' ? 'sky panorama' : '3D model'} preview"
+      alt="{item.name}, {KIND_ALT[item.kind]} preview"
       width={item.kind === 'skies' ? 1280 : 1024}
       height={item.kind === 'skies' ? 720 : 1024}
       loading={eager ? 'eager' : 'lazy'}
@@ -60,8 +62,8 @@
     transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
   }
 
-  /* Sky previews are landscape photos of the sky: they fill the square instead. */
-  .sky img {
+  /* Sky and material previews are full pictures, not cut out: they fill the square instead. */
+  .fill img {
     object-fit: cover;
   }
 
@@ -69,7 +71,7 @@
     transform: translateY(-3px) scale(1.03);
   }
 
-  .sky:hover img {
+  .fill:hover img {
     transform: scale(1.04);
   }
 

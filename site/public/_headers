@@ -4,10 +4,16 @@
 /skies/*
   Access-Control-Allow-Origin: *
 
+/materials/*
+  Access-Control-Allow-Origin: *
+
 /models.json
   Access-Control-Allow-Origin: *
 
 /skies.json
+  Access-Control-Allow-Origin: *
+
+/materials.json
   Access-Control-Allow-Origin: *
 
 /llms.txt

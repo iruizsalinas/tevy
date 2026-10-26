@@ -2,8 +2,9 @@
 // /<kind> (catalog), /<kind>/<slug> (page), /<kind>/<slug>.json (metadata), /<kind>.json (index).
 import { formatBytes, formatCount, lod0, type Model } from './models';
 import { mainFile, resolutionLabel, type Sky } from './skies';
+import { materialSets, setLabel, type Material } from './materials';
 
-export type Kind = 'models' | 'skies';
+export type Kind = 'models' | 'skies' | 'materials';
 
 export interface KindInfo {
   kind: Kind;
@@ -31,6 +32,13 @@ export const KINDS: KindInfo[] = [
     title: 'Free CC0 HDR skies',
     blurb: 'Every sky is a CC0 HDR panorama that lights your scene and serves as its background.',
   },
+  {
+    kind: 'materials',
+    label: 'Materials',
+    singular: 'material',
+    title: 'Free CC0 PBR materials',
+    blurb: 'Every material is a seamless CC0 PBR texture set in compressed KTX2, sized to real-world meters.',
+  },
 ];
 
 /** The first sentence of an item description, for search snippets; the rest is technical detail. */
@@ -43,7 +51,7 @@ export function kindInfo(kind: Kind): KindInfo {
   return KINDS.find((k) => k.kind === kind)!;
 }
 
-export type Item = (Model & { kind: 'models' }) | (Sky & { kind: 'skies' });
+export type Item = (Model & { kind: 'models' }) | (Sky & { kind: 'skies' }) | (Material & { kind: 'materials' });
 
 export function itemUrl(item: Pick<Item, 'kind' | 'slug'>): string {
   return `/${item.kind}/${item.slug}`;
@@ -64,6 +72,10 @@ export function cardMeta(item: Item): string {
   if (item.kind === 'models') {
     const f = lod0(item);
     return `${formatCount(f.triangles)} tris · ${formatBytes(f.bytes)}`;
+  }
+  if (item.kind === 'materials') {
+    const [set] = materialSets(item.files);
+    return `${item.tileSize} m · ${setLabel(set.width)} · ${formatBytes(set.bytes)}`;
   }
   const f = mainFile(item);
   return `${resolutionLabel(f)} HDR · ${formatBytes(f.bytes)}`;

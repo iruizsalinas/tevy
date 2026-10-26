@@ -168,7 +168,7 @@ function roadTexture() {
 }
 
 /** Mean colour of the sky just above the horizon, so the ground can fade into it. */
-function horizonColor(texture) {
+export function horizonColor(texture) {
   const { data, width, height } = texture.image;
   const read = texture.type === HalfFloatType ? DataUtils.fromHalfFloat : (v) => v;
   const row = (y) => {

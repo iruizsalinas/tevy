@@ -3,12 +3,14 @@
   import { latestPath } from '#lib/catalog';
   import { SITE_URL, lod0, type Model } from '#lib/models';
   import { mainFile, type Sky } from '#lib/skies';
+  import type { Material } from '#lib/materials';
   import {
     THREE_PARTS_SNIPPET,
     babylonSnippet,
     modelViewerSnippet,
     r3fSnippet,
     threeLodSnippet,
+    threeMaterialSnippet,
     threeModelSnippet,
     threeSkySnippet,
   } from '#lib/docs';
@@ -16,13 +18,14 @@
   import Seo from '#lib/components/Seo.svelte';
 
   // How to use tevy files, once for every item: URLs, versions, and code for three.js and other
-  // engines. The examples use a real model and sky so they can be pasted as they are.
-  let { model, sky }: { model: Model; sky: Sky | null } = $props();
+  // engines. The examples use a real model, sky and material so they can be pasted as they are.
+  let { model, sky, material }: { model: Model; sky: Sky | null; material: Material | null } = $props();
 
   const pinned = $derived(`${SITE_URL}${lod0(model).path}`);
   const latest = $derived(`${SITE_URL}${latestPath(lod0(model).path)}`);
   const versionBase = $derived(`${SITE_URL}/models/${model.slug}/v${model.version}`);
   const skyUrl = $derived(sky ? `${SITE_URL}${mainFile(sky).path}` : '');
+  const materialBase = $derived(material ? `${SITE_URL}/materials/${material.slug}/v${material.version}` : '');
 
   const toc = [
     ['agents', 'Building with an AI agent'],
@@ -30,6 +33,7 @@
     ['versions', 'Versions: pinned or latest'],
     ['three-models', 'three.js: models'],
     ['three-skies', 'three.js: skies'],
+    ['three-materials', 'three.js: materials'],
     ['other', 'Other engines'],
     ['metadata', 'Metadata and indexes'],
   ];
@@ -45,8 +49,8 @@
 </script>
 
 <Seo
-  title="How to use tevy models and skies"
-  description="How to load tevy models and skies in three.js, React Three Fiber, Babylon.js and model-viewer, how to build with an AI agent, and when to pin a version or follow the latest."
+  title="How to use tevy models, skies and materials"
+  description="How to load tevy models, skies and materials in three.js, React Three Fiber, Babylon.js and model-viewer, how to build with an AI agent, and when to pin a version or follow the latest."
   path="/docs"
 />
 
@@ -80,7 +84,7 @@
 
       <section id="urls">
         <h2 tabindex="-1">Files and URLs</h2>
-        <p>Every section (models, skies) has the same shape:</p>
+        <p>Every section (models, skies, materials) has the same shape:</p>
         <table class="paths">
           <tbody>
             <tr><td class="mono">/models/&lt;slug&gt;</td><td>The page, with a preview and the downloads.</td></tr>
@@ -94,7 +98,8 @@
         <p>
           Slugs are permanent. Models have levels of detail: <span class="mono">lod0.glb</span> is full detail, <span class="mono">lod1.glb</span> and
           up have fewer triangles. Skies have <span class="mono">2k.jpg</span> for background and lighting and <span class="mono">1k.jpg</span> for
-          lighting only.
+          lighting only. Materials have a color, normal and ORM map in two sizes, such as <span class="mono">color-2k.ktx2</span> and
+          <span class="mono">color-1k.ktx2</span>.
         </p>
       </section>
 
@@ -164,6 +169,22 @@
         </section>
       {/if}
 
+      {#if material}
+        <section id="three-materials">
+          <h2 tabindex="-1">three.js: materials</h2>
+          <p>
+            Materials are seamless PBR texture sets for large surfaces such as roads and ground. Each has three KTX2 textures: color (sRGB),
+            normal (OpenGL convention, which three.js uses) and ORM, which packs occlusion, roughness and metalness like glTF. They load with
+            the same KTX2Loader as the models.
+          </p>
+          <CodeBlock title="Use a material" code={threeMaterialSnippet(materialBase, material.tileSize)} />
+          <p>
+            <span class="mono">tileSize</span> in the metadata is the size in meters of one repeat, so the texture keeps its real scale on any
+            surface. The 1K maps are a quarter of the download and look the same beyond a few meters.
+          </p>
+        </section>
+      {/if}
+
       <section id="other">
         <h2 tabindex="-1">Other engines</h2>
         <p>
@@ -190,7 +211,8 @@
             Every file has its byte size and sha256, so you can check a download or cache files by hash.
           </li>
           <li>
-            <a class="mono" href="/models.json">models.json</a> and <a class="mono" href="/skies.json">skies.json</a> hold the latest version of
+            <a class="mono" href="/models.json">models.json</a>, <a class="mono" href="/skies.json">skies.json</a> and
+            <a class="mono" href="/materials.json">materials.json</a> hold the latest version of
             every item of a section in one file, for tools and build scripts. The version history is in each item's own file.
           </li>
         </ul>

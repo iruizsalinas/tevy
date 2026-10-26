@@ -2,10 +2,11 @@
 import { KINDS, itemUrl, type Item, type Kind } from '#lib/catalog';
 import { SITE_URL, TRANSCODER_URL, categoryLabel, formatBytes, formatDimensions, lod0, type Model } from '#lib/models';
 import { formatLabel, mainFile, type Sky } from '#lib/skies';
+import { materialSets, setLabel, type Material } from '#lib/materials';
 import { generatedAt, published } from '#lib/server/catalog';
 
 /**
- * /models.json, /skies.json: the latest version of every item, sorted by slug. The version history
+ * /models.json, /skies.json, /materials.json: the latest version of every item, sorted by slug. The version history
  * stays in each item's own file, so the index grows with the catalog, not with every release.
  */
 export function indexJson(kind: Kind, items: Item[]): string {
@@ -38,18 +39,25 @@ function skyLine(s: Sky): string {
   return `- [${s.name}](${SITE_URL}/skies/${s.slug}.json): ${facts.join(', ')}. ${s.description}`;
 }
 
+function materialLine(m: Material): string {
+  const sizes = materialSets(m.files).map((s) => `${setLabel(s.width)} ${formatBytes(s.bytes)}`);
+  const facts = [`tile ${m.tileSize} m`, `color, normal and ORM maps (${sizes.join(', ')})`, `version ${m.version}`];
+  return `- [${m.name}](${SITE_URL}/materials/${m.slug}.json): ${facts.join(', ')}. ${m.description}`;
+}
+
 export function llmsTxt(all: Record<Kind, Item[]>): string {
   const models = all.models as Model[];
   const skies = all.skies as Sky[];
+  const materials = all.materials as Material[];
   return `# tevy
 
-> Free, browser-sized assets for three.js and any glTF engine: 3D models (cars, trees, plants, rocks, road props) and HDR sky panoramas. Everything is CC0 1.0: public domain, free for commercial use, no attribution required.
+> Free, browser-sized assets for three.js and any glTF engine: 3D models (cars, trees, plants, rocks, buildings, road props), HDR sky panoramas and seamless PBR ground materials. Everything is CC0 1.0: public domain, free for commercial use, no attribution required.
 
 ## Download
 
 - Every file is a plain HTTPS GET: no account and no API key. CORS is open, so browsers can load files straight from ${SITE_URL}.
 - The site has one section per kind of asset, all with the same shape: ${KINDS.map((k) => `/${k.kind}`).join(', ')}. Each item has a page at /<section>/<slug>, a metadata file next to it, and the section has an index at /<section>.json.
-- Versions: a published file never changes. An improved item gets a new version in a new folder (v2, v3, ...) and older versions stay online, so a site that loads v1 keeps getting the same file. The latest version of every file is also served without the version folder (/models/<slug>/lod0.glb, /skies/<slug>/2k.jpg); it changes when a new version ships, so pin the versioned URL for anything you ship. \`version\` in the metadata is the latest; \`versions\` lists every version, newest first, with its date, a note on what changed, and its files.
+- Versions: a published file never changes. An improved item gets a new version in a new folder (v2, v3, ...) and older versions stay online, so a site that loads v1 keeps getting the same file. The latest version of every file is also served without the version folder (/models/<slug>/lod0.glb, /skies/<slug>/2k.jpg, /materials/<slug>/color-2k.ktx2); it changes when a new version ships, so pin the versioned URL for anything you ship. \`version\` in the metadata is the latest; \`versions\` lists every version, newest first, with its date, a note on what changed, and its files.
 - Slugs are permanent identifiers within a section. Categories may change and are not part of any URL.
 
 ## Models
@@ -94,6 +102,28 @@ scene.background = sky;
 scene.environment = sky;
 \`\`\`
 
+## Materials
+
+Seamless PBR texture sets for large surfaces (roads, verges, forest floor), as KTX2 (Basis Universal) textures with mipmaps that tile.
+
+- Metadata: ${SITE_URL}/materials/<slug>.json lists the files with map, size, codec and sha256, and \`tileSize\`: the meters covered by one repeat.
+- Files: ${SITE_URL}/materials/<slug>/v<version>/color-2k.ktx2 (sRGB base color), normal-2k.ktx2 (OpenGL convention, as three.js expects) and orm-2k.ktx2 (glTF packing: occlusion in R, roughness in G, metalness in B). The same three maps exist at 1K (color-1k.ktx2, ...).
+
+\`\`\`js
+import { MeshStandardMaterial, RepeatWrapping, SRGBColorSpace } from 'three';
+
+// ktx2: the KTX2Loader set up for the models
+const [color, normal, orm] = await Promise.all(
+  ['color', 'normal', 'orm'].map((map) => ktx2.loadAsync(\`${SITE_URL}/materials/<slug>/v1/\${map}-2k.ktx2\`)),
+);
+color.colorSpace = SRGBColorSpace;
+for (const t of [color, normal, orm]) {
+  t.wrapS = t.wrapT = RepeatWrapping;
+  t.repeat.set(width / tileSize, depth / tileSize); // plane size in meters
+}
+const material = new MeshStandardMaterial({ map: color, normalMap: normal, aoMap: orm, roughnessMap: orm, metalnessMap: orm });
+\`\`\`
+
 ## Index
 
 - [Featured](${SITE_URL}/): a selection from every section
@@ -108,6 +138,10 @@ ${models.map(modelLine).join('\n')}
 ## Sky list
 
 ${skies.length ? skies.map(skyLine).join('\n') : 'No skies are published yet.'}
+
+## Material list
+
+${materials.length ? materials.map(materialLine).join('\n') : 'No materials are published yet.'}
 `;
 }
 
