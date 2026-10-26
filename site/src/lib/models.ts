@@ -68,7 +68,7 @@ export function formatDimensions(d: Model['dimensions']): string {
 }
 
 export function modelUrl(model: Pick<Model, 'slug'>): string {
-  return `/models/${model.slug}/`;
+  return `/models/${model.slug}`;
 }
 
 export function fileName(path: string): string {

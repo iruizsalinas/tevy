@@ -79,7 +79,7 @@
 
   <aside class="info">
     <nav class="crumbs" aria-label="Breadcrumb">
-      <a href="/models/">Models</a><span aria-hidden="true">/</span><a href="/models/?category={encodeURIComponent(model.category)}">{categoryLabel(model.category)}</a>
+      <a href="/models">Models</a><span aria-hidden="true">/</span><a href="/models?category={encodeURIComponent(model.category)}">{categoryLabel(model.category)}</a>
     </nav>
     <h1 class="display">{model.name}</h1>
     <p class="lede">{model.description}</p>
@@ -129,7 +129,7 @@
     {#if model.tags?.length}
       <ul class="tags" aria-label="Tags">
         {#each model.tags as tag (tag)}
-          <li><a class="pill" href="/models/?search={encodeURIComponent(tag)}">{tag}</a></li>
+          <li><a class="pill" href="/models?search={encodeURIComponent(tag)}">{tag}</a></li>
         {/each}
       </ul>
     {/if}

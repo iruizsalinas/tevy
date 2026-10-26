@@ -19,7 +19,7 @@ export interface Page {
 }
 
 export interface Output {
-  /** URL path, e.g. / or /models/<slug>/ or /llms.txt */
+  /** URL path without a trailing slash, e.g. /models/<slug> or /llms.txt */
   path: string;
   /** File in the output folder, e.g. index.html */
   file: string;
@@ -39,12 +39,12 @@ function page<P extends Record<string, unknown>>(component: Component<P>, entry:
 export function outputs(): Output[] {
   const models = readModels();
   return [
-    { path: '/', file: '', redirect: '/models/' },
-    { path: '/models/', file: 'models/index.html', page: () => page(Catalog, 'catalog', { models }) },
-    { path: '/license/', file: 'license/index.html', page: () => page(License, 'license', {}) },
+    { path: '/', file: '', redirect: '/models' },
+    { path: '/models', file: 'models/index.html', page: () => page(Catalog, 'catalog', { models }) },
+    { path: '/license', file: 'license/index.html', page: () => page(License, 'license', {}) },
     ...models.map((model) => {
       const path = modelUrl(model);
-      return { path, file: `${path.slice(1)}index.html`, page: () => page(Model, 'model', { model }) };
+      return { path, file: `${path.slice(1)}/index.html`, page: () => page(Model, 'model', { model }) };
     }),
     { path: '/404.html', file: '404.html', page: () => page(Missing, 'missing', {}) },
     { path: '/models.json', file: 'models.json', text: modelsJson(models), type: 'application/json' },

@@ -9,7 +9,7 @@
   <p class="code mono">404</p>
   <h1 class="display">{title}</h1>
   <p class="message">{message}</p>
-  <a class="btn primary" href="/models/">Browse all models</a>
+  <a class="btn primary" href="/models">Browse all models</a>
 </div>
 
 <style>

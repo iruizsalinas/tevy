@@ -9,7 +9,7 @@
     name="description"
     content="Every tevy model is CC0 1.0: public domain, free for personal and commercial use, no attribution required. The website code is MIT."
   />
-  <link rel="canonical" href="{SITE_URL}/license/" />
+  <link rel="canonical" href="{SITE_URL}/license" />
 </svelte:head>
 
 <Layout>

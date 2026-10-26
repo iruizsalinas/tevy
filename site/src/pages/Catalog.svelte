@@ -79,13 +79,13 @@
     name="description"
     content="Browse every free CC0 3D model on tevy: cars, trees, plants, rocks and road props as compact glTF with LODs, meshopt geometry and KTX2 textures."
   />
-  <link rel="canonical" href="{SITE_URL}/models/" />
+  <link rel="canonical" href="{SITE_URL}/models" />
   <link rel="alternate" type="application/json" href="/models.json" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="tevy" />
   <meta property="og:title" content="All models | tevy" />
   <meta property="og:description" content="Cars, trees, rocks and props as compact glTF for three.js and any engine. CC0, free for any use." />
-  <meta property="og:url" content="{SITE_URL}/models/" />
+  <meta property="og:url" content="{SITE_URL}/models" />
   <meta property="og:image" content="{SITE_URL}/tevy.png" />
 </svelte:head>
 

@@ -59,8 +59,8 @@ Other engines need the same two glTF extensions: meshopt decoding and KTX2 (Basi
 
 - [models.json](${SITE_URL}/models.json): every model.json in one file, sorted by slug
 - [model.json](${SITE_URL}/models/<slug>/model.json): metadata of one model
-- [Catalog](${SITE_URL}/models/): the website, searchable with ?search=<words> and ?category=<category>, with an interactive 3D viewer per model
-- [License](${SITE_URL}/license/): what CC0 1.0 allows
+- [Catalog](${SITE_URL}/models): the website, searchable with ?search=<words> and ?category=<category>, with an interactive 3D viewer per model
+- [License](${SITE_URL}/license): what CC0 1.0 allows
 
 ## Models
 
@@ -72,8 +72,8 @@ ${models.map(modelLine).join('\n')}
 export function sitemapXml(models: Model[]): string {
   const urls = [
     `  <url><loc>${SITE_URL}/</loc></url>`,
-    `  <url><loc>${SITE_URL}/models/</loc></url>`,
-    `  <url><loc>${SITE_URL}/license/</loc></url>`,
+    `  <url><loc>${SITE_URL}/models</loc></url>`,
+    `  <url><loc>${SITE_URL}/license</loc></url>`,
     ...models.map(
       (m) => `  <url><loc>${SITE_URL}${modelUrl(m)}</loc>${m.updated ? `<lastmod>${m.updated}</lastmod>` : ''}</url>`,
     ),

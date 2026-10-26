@@ -10,7 +10,14 @@ export function devPages() {
       return () =>
         server.middlewares.use(async (req, res, next) => {
           try {
-            const path = new URL(req.url ?? '/', 'http://localhost').pathname;
+            const url = new URL(req.url ?? '/', 'http://localhost');
+            const path = url.pathname;
+            // Like the host (html_handling: drop-trailing-slash): /models/ redirects to /models.
+            if (path.length > 1 && path.endsWith('/')) {
+              res.writeHead(307, { location: path.slice(0, -1) + url.search });
+              res.end();
+              return;
+            }
             const { outputs } = await server.ssrLoadModule('/site/src/render.ts');
             const all = outputs();
             const found = all.find((o) => o.path === path);

@@ -4,7 +4,7 @@
 
 <footer>
   <p>
-    Models <a href={CC0_URL} rel="license">CC0 1.0</a>, site code MIT. <a href="/license/">License</a>
+    Models <a href={CC0_URL} rel="license">CC0 1.0</a>, site code MIT. <a href="/license">License</a>
   </p>
   <p class="links mono">
     <a href="/models.json">models.json</a>
