@@ -73,11 +73,7 @@
       <div><dt>Format</dt><dd class="mono">{formatLabel(main.format)}</dd></div>
       <div><dt>License</dt><dd class="mono"><a href={CC0_URL} rel="license">CC0 1.0</a></dd></div>
       {#if sky.sun}
-        <div><dt>Sun elevation</dt><dd class="mono">{sky.sun.elevation}°</dd></div>
-        <div><dt>Sun azimuth</dt><dd class="mono">{sky.sun.azimuth}°</dd></div>
-      {/if}
-      {#if sky.exposure != null}
-        <div class="wide"><dt>Suggested exposure</dt><dd class="mono">{sky.exposure}</dd></div>
+        <div class="wide"><dt>Sun elevation</dt><dd class="mono">{sky.sun.elevation}°</dd></div>
       {/if}
       <div class="wide">
         <dt>Version</dt>
@@ -102,14 +98,12 @@
             >
               <Icon name="download" size={14} />HDR
             </a>
-            <span class="file first mono">{file.path}</span>
-            {#if file.sha256}<span class="file mono" title="sha256 {file.sha256}">sha256 {file.sha256}</span>{/if}
           </li>
         {/each}
       </ul>
       <p class="fine">
-        Equirectangular, +Y up, {formatLabel(main.format)}: a JPEG with an HDR gain map, so it opens as a
-        normal image too. Files of a version never change; improvements ship as a new version.
+        Equirectangular {formatLabel(main.format)}: a JPEG with an HDR gain map, so it opens as a normal
+        image too.
         <a class="mono" href="/skies/{sky.slug}.json">{sky.slug}.json</a>
       </p>
     </section>
@@ -280,19 +274,6 @@
     white-space: nowrap;
     font-size: 11.5px;
     color: var(--muted);
-  }
-
-  .file {
-    grid-column: 1 / -1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 10.5px;
-    color: var(--faint);
-  }
-
-  .first {
-    margin-top: 4px;
   }
 
   .changes {

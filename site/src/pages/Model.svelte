@@ -90,12 +90,6 @@
       <div><dt>LODs</dt><dd class="mono">{model.files.length}</dd></div>
       <div><dt>License</dt><dd class="mono"><a href={CC0_URL} rel="license">CC0 1.0</a></dd></div>
       <div class="wide"><dt>Dimensions</dt><dd class="mono">{formatDimensions(model.dimensions) || '-'}</dd></div>
-      {#if model.parts?.length}
-        <div class="wide">
-          <dt>Parts</dt>
-          <dd class="mono">{model.parts.join(', ')}</dd>
-        </div>
-      {/if}
       <div class="wide">
         <dt>Version</dt>
         <dd class="mono">v{model.version}{#if model.updated}, <time datetime={model.updated}>{model.updated}</time>{/if}</dd>
@@ -119,14 +113,11 @@
             >
               <Icon name="download" size={14} />GLB
             </a>
-            <span class="file first mono">{file.path}</span>
-            {#if file.sha256}<span class="file mono" title="sha256 {file.sha256}">sha256 {file.sha256}</span>{/if}
           </li>
         {/each}
       </ul>
       <p class="fine">
-        GLB, meshopt geometry, KTX2 textures. Meters, +Y up, front faces +Z. Files of a version
-        never change; improvements ship as a new version.
+        GLB with meshopt geometry and KTX2 textures, in meters.
         <a class="mono" href="/models/{model.slug}.json">{model.slug}.json</a>
       </p>
     </section>
@@ -297,19 +288,6 @@
     white-space: nowrap;
     font-size: 11.5px;
     color: var(--muted);
-  }
-
-  .file {
-    grid-column: 1 / -1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 10.5px;
-    color: var(--faint);
-  }
-
-  .first {
-    margin-top: 4px;
   }
 
   .changes {
