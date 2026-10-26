@@ -1,4 +1,6 @@
 // Dev server: renders pages and generated files from site/src/render.ts on request, like the build.
+import { createReadStream } from 'node:fs';
+import { join } from 'node:path';
 import { shell } from './shell.js';
 
 export function devPages() {
@@ -28,6 +30,12 @@ export function devPages() {
               return;
             }
             res.statusCode = found ? 200 : 404;
+            if (out.copy) {
+              const types = { glb: 'model/gltf-binary', jpg: 'image/jpeg', webp: 'image/webp' };
+              res.setHeader('content-type', types[out.copy.split('.').pop()] ?? 'application/octet-stream');
+              createReadStream(join(server.config.root, 'site', 'public', out.copy)).pipe(res);
+              return;
+            }
             if (out.text !== undefined) {
               res.setHeader('content-type', out.type);
               res.end(out.text);

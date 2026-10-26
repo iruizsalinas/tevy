@@ -43,6 +43,11 @@ export function itemUrl(item: Pick<Item, 'kind' | 'slug'>): string {
   return `/${item.kind}/${item.slug}`;
 }
 
+/** The unversioned URL of a file, which always serves the latest version: /models/x/v2/lod0.glb -> /models/x/lod0.glb */
+export function latestPath(path: string): string {
+  return path.replace(/\/v\d+\/([^/]+)$/, '/$1');
+}
+
 /** The short facts on a catalog card. */
 export function cardMeta(item: Item): string {
   if (item.kind === 'models') {

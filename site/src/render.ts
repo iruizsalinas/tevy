@@ -2,7 +2,7 @@
 // Used by site/build.mjs at build time and by the dev server in vite.config.js.
 import type { Component } from 'svelte';
 import { render } from 'svelte/server';
-import { KINDS, itemUrl, type Item } from '#lib/catalog';
+import { KINDS, itemUrl, latestPath, type Item } from '#lib/catalog';
 import { featured, readAll, verifyFiles } from '#lib/server/catalog';
 import { indexJson, llmsTxt, robotsTxt, sitemapXml } from '#lib/server/files';
 import Catalog from './pages/Catalog.svelte';
@@ -28,6 +28,8 @@ export interface Output {
   page?: () => Page;
   /** Redirect target; the build writes these into _redirects. */
   redirect?: string;
+  /** A file in site/public served at this path too, e.g. /models/<slug>/v2/lod0.glb */
+  copy?: string;
   text?: string;
   type?: string;
 }
@@ -53,6 +55,8 @@ export function outputs(): Output[] {
         const path = itemUrl(item);
         return { path, file: `${path.slice(1)}/index.html`, page: () => itemPage(item) };
       }),
+      // The latest version's files at unversioned URLs, for sites that follow new versions.
+      ...all[kind].flatMap((item) => item.files.map((f) => ({ path: latestPath(f.path), file: latestPath(f.path).slice(1), copy: f.path }))),
     ]),
     ...KINDS.map(({ kind }) => ({ path: `/${kind}.json`, file: `${kind}.json`, text: indexJson(kind, all[kind]), type: 'application/json' })),
     { path: '/license', file: 'license/index.html', page: () => page(License, 'license', {}) },

@@ -1,6 +1,6 @@
 // Builds the site into dist/: the client bundle under /assets/, site/public as is, then every
 // prerendered page and generated file from site/src/render.ts.
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { build } from 'vite';
@@ -54,7 +54,8 @@ for (const out of outputs()) {
   }
   const file = join(OUT, out.file);
   mkdirSync(dirname(file), { recursive: true });
-  if (out.text !== undefined) writeFileSync(file, out.text);
+  if (out.copy) copyFileSync(join(ROOT, 'site', 'public', out.copy), file);
+  else if (out.text !== undefined) writeFileSync(file, out.text);
   else {
     const page = out.page();
     writeFileSync(file, shell(page, tags(page.entry)));
