@@ -1,7 +1,5 @@
 <script lang="ts">
-  import '@fontsource-variable/inter';
-  import '@fontsource-variable/bricolage-grotesque/standard.css';
-  import '@fontsource-variable/jetbrains-mono';
+  import '../fonts.css';
   import '../app.css';
   import SiteHeader from '#lib/components/SiteHeader.svelte';
   import SiteFooter from '#lib/components/SiteFooter.svelte';
