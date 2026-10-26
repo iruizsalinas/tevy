@@ -33,7 +33,9 @@ for (const kind of SECTIONS) {
   if (!res.ok) throw new Error(`/${kind}.json: HTTP ${res.status}`);
   const items = (await res.json())[kind];
   let downloaded = 0;
-  for (const item of items) {
+  for (const entry of items) {
+    // The index lists the latest version only; the item's own file has every version.
+    const item = JSON.parse((await get(`/${kind}/${entry.slug}.json`)).toString('utf8'));
     // Every version, so a deploy from this checkout keeps serving the older ones.
     for (const file of item.versions.flatMap((v) => v.files)) {
       const local = join(publicDir, file.path);

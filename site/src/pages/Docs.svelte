@@ -79,7 +79,7 @@
             <tr><td class="mono">/models/&lt;slug&gt;/v1/lod0.glb</td><td>A file of version 1. It never changes.</td></tr>
             <tr><td class="mono">/models/&lt;slug&gt;/lod0.glb</td><td>The same file of the latest version.</td></tr>
             <tr><td class="mono">/models/&lt;slug&gt;/v1/preview.webp</td><td>The preview image of version 1.</td></tr>
-            <tr><td class="mono">/models.json</td><td>Every model's metadata in one file.</td></tr>
+            <tr><td class="mono">/models.json</td><td>The latest version of every model in one file.</td></tr>
           </tbody>
         </table>
         <p>
@@ -181,8 +181,8 @@
             Every file has its byte size and sha256, so you can check a download or cache files by hash.
           </li>
           <li>
-            <a class="mono" href="/models.json">models.json</a> and <a class="mono" href="/skies.json">skies.json</a> hold every item of a section
-            in one file, for tools and build scripts.
+            <a class="mono" href="/models.json">models.json</a> and <a class="mono" href="/skies.json">skies.json</a> hold the latest version of
+            every item of a section in one file, for tools and build scripts. The version history is in each item's own file.
           </li>
           <li><a class="mono" href="/llms.txt">llms.txt</a> describes the site and lists every item for AI assistants.</li>
         </ul>

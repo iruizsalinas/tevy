@@ -4,9 +4,16 @@ import { SITE_URL, TRANSCODER_URL, categoryLabel, formatBytes, formatDimensions,
 import { formatLabel, mainFile, type Sky } from '#lib/skies';
 import { generatedAt, published } from '#lib/server/catalog';
 
-/** /models.json, /skies.json: every item's metadata file in one, sorted by slug. */
+/**
+ * /models.json, /skies.json: the latest version of every item, sorted by slug. The version history
+ * stays in each item's own file, so the index grows with the catalog, not with every release.
+ */
 export function indexJson(kind: Kind, items: Item[]): string {
-  return JSON.stringify({ schema: 2, site: SITE_URL, generated: generatedAt(items), count: items.length, [kind]: items.map(published) });
+  const entries = items.map((item) => {
+    const { schema: _, versions: __, ...latest } = published(item);
+    return latest;
+  });
+  return JSON.stringify({ schema: 1, site: SITE_URL, generated: generatedAt(items), count: items.length, [kind]: entries });
 }
 
 function modelLine(m: Model): string {
@@ -90,7 +97,7 @@ scene.environment = sky;
 ## Index
 
 - [Featured](${SITE_URL}/): a selection from every section
-${KINDS.map((k) => `- [${k.label}](${SITE_URL}/${k.kind}): the catalog, searchable with ?search=<words> and ?category=<category>\n- [${k.kind}.json](${SITE_URL}/${k.kind}.json): every ${k.singular}'s metadata in one file, sorted by slug`).join('\n')}
+${KINDS.map((k) => `- [${k.label}](${SITE_URL}/${k.kind}): the catalog, searchable with ?search=<words> and ?category=<category>\n- [${k.kind}.json](${SITE_URL}/${k.kind}.json): the latest version of every ${k.singular} in one file, sorted by slug; version history in each item's own .json`).join('\n')}
 - [Docs](${SITE_URL}/docs): loading in three.js and other engines, and pinned versus latest versions
 - [License](${SITE_URL}/license): what CC0 1.0 allows
 
