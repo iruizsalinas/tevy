@@ -36,7 +36,7 @@ export interface Sky {
   updated?: string;
   projection?: string;
   up?: string;
-  sun?: { azimuth: number; elevation: number; direction?: number[] };
+  sun?: { azimuth: number; elevation: number; direction?: number[]; color?: number[]; illuminance?: number };
   /** Suggested renderer.toneMappingExposure. */
   exposure?: number;
   preview: string;

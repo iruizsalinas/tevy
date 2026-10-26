@@ -17,7 +17,7 @@
   let progress = $state<number | null>(null);
   let failed = $state(false);
   let rotate = $state(true);
-  let spheres = $state(true);
+  let showScene = $state(true);
   // Largest file first: the viewer starts with the full-size panorama.
   const files = $derived([...sky.files].sort((a, b) => b.width - a.width));
   let fileValue = $state('0');
@@ -29,7 +29,7 @@
     loading = true;
     failed = false;
     try {
-      await viewer.load(files[index].path, { exposure: sky.exposure ?? 1 });
+      await viewer.load(files[index].path, { exposure: sky.exposure ?? 1, sun: sky.sun });
       ready = true;
     } catch (err) {
       console.error(err);
@@ -78,8 +78,8 @@
   });
 
   $effect(() => {
-    const on = spheres;
-    viewer?.setSpheres(on);
+    const on = showScene;
+    viewer?.setScene(on);
   });
 
   function fullscreen() {
@@ -108,8 +108,8 @@
           <button type="button" aria-pressed={rotate} title="Auto-rotate" onclick={() => (rotate = !rotate)}>
             <Icon name="refresh" size={17} /><span class="sr-only">Auto-rotate</span>
           </button>
-          <button type="button" aria-pressed={spheres} title="Light probe spheres" onclick={() => (spheres = !spheres)}>
-            <Icon name="layers" size={17} /><span class="sr-only">Light probe spheres</span>
+          <button type="button" aria-pressed={showScene} title="Show the road scene" onclick={() => (showScene = !showScene)}>
+            <Icon name="layers" size={17} /><span class="sr-only">Show the road scene</span>
           </button>
           <button type="button" title="Reset view" onclick={() => viewer?.reset()}>
             <Icon name="frame" size={17} /><span class="sr-only">Reset view</span>
@@ -134,7 +134,7 @@
       </div>
     {/if}
 
-    <p class="hint">Drag to look around, scroll or pinch to zoom</p>
+    <p class="hint">Drag to look around the sky and the car</p>
   {/if}
 </section>
 
