@@ -226,7 +226,7 @@
         </p>
         <CodeBlock title="React Three Fiber" code={r3fSnippet(pinned)} />
         <CodeBlock title="Babylon.js" code={babylonSnippet(pinned)} />
-        <CodeBlock title="model-viewer, no build step" code={modelViewerSnippet(pinned)} />
+        <CodeBlock title="model-viewer, no build step" lang="html" code={modelViewerSnippet(pinned)} />
         <p>
           Skies open as ordinary JPEGs anywhere; for the HDR range your engine needs to read the gain map (three.js does, through
           UltraHDRLoader).

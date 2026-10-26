@@ -1,8 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { highlight, type Lang } from '#lib/highlight';
   import Icon from './Icon.svelte';
 
-  let { code, title }: { code: string; title: string } = $props();
+  let { code, title, lang = 'js' }: { code: string; title: string; lang?: Lang } = $props();
+
+  const tokens = $derived(highlight(code, lang));
 
   let canCopy = $state(false);
   let copied = $state(false);
@@ -27,7 +30,7 @@
       </button>
     {/if}
   </div>
-  <pre class="mono"><code>{code}</code></pre>
+  <pre class="mono"><code>{#each tokens as token, i (i)}{#if token.kind}<span class={token.kind}>{token.text}</span>{:else}{token.text}{/if}{/each}</code></pre>
 </div>
 
 <style>
@@ -49,12 +52,56 @@
     padding: 14px 16px;
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    background: var(--canvas);
+    background: var(--code-bg);
     overflow-x: auto;
     font-size: 12.5px;
     line-height: 1.65;
-    color: var(--muted);
+    color: var(--code-text);
     tab-size: 2;
+  }
+
+  /* Colors of a code editor's dark theme, kept readable on the cocoa panel. */
+  .comment {
+    color: #8fb573;
+    font-style: italic;
+  }
+
+  .string {
+    color: #dd9a74;
+  }
+
+  .number {
+    color: #c3dcae;
+  }
+
+  .control {
+    color: #d7a2d6;
+  }
+
+  .keyword,
+  .tag {
+    color: #7fb2e5;
+  }
+
+  .function {
+    color: #e6e6b0;
+  }
+
+  .type {
+    color: #6fd6bd;
+  }
+
+  .constant {
+    color: #6fcbff;
+  }
+
+  .variable,
+  .attr {
+    color: #a8dcfe;
+  }
+
+  .punct {
+    color: #a99887;
   }
 
   @media (max-width: 640px) {
