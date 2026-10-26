@@ -30,6 +30,7 @@
     ['three-skies', 'three.js: skies'],
     ['other', 'Other engines'],
     ['metadata', 'Metadata and indexes'],
+    ['agents', 'Building with an AI agent'],
   ];
 
   // Scrolls to a section without putting a #fragment in the address bar.
@@ -184,9 +185,18 @@
             <a class="mono" href="/models.json">models.json</a> and <a class="mono" href="/skies.json">skies.json</a> hold the latest version of
             every item of a section in one file, for tools and build scripts. The version history is in each item's own file.
           </li>
-          <li><a class="mono" href="/llms.txt">llms.txt</a> describes the site and lists every item for AI assistants.</li>
         </ul>
         <p>You can also download files and host them yourself; CC0 allows any use.</p>
+      </section>
+
+      <section id="agents">
+        <h2 tabindex="-1">Building with an AI agent</h2>
+        <p>
+          If an AI coding agent writes your code, give it <a class="mono" href="/llms.txt">{SITE_URL}/llms.txt</a>. It is a single text page
+          made for agents: what tevy is, the URL layout, the loader setup and every item with a link to its metadata, so the agent picks
+          real assets and uses working URLs instead of guessing.
+        </p>
+        <p>For example: <span class="mono">Read {SITE_URL}/llms.txt and add a spruce forest along the road using tevy models.</span></p>
       </section>
     </article>
   </div>
