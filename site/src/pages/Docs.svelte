@@ -92,7 +92,6 @@
           <tbody>
             <tr><td>URL</td><td class="mono">{pinned.replace(SITE_URL, '')}</td><td class="mono">{latest.replace(SITE_URL, '')}</td></tr>
             <tr><td>Changes</td><td>Never</td><td>When a new version ships</td></tr>
-            <tr><td>Browser cache</td><td>One year</td><td>10 minutes</td></tr>
             <tr><td>Use it for</td><td>Anything you ship</td><td>Prototypes, demos, always the best version</td></tr>
           </tbody>
         </table>
@@ -102,7 +101,7 @@
             the node names, and a pinned URL keeps your project exactly as you tested it.
           </li>
           <li>
-            <strong>Use latest</strong> to get improvements without touching your code. Updates reach your visitors within about 10 minutes.
+            <strong>Use latest</strong> to get improvements without touching your code. Updates reach your visitors as soon as a new version is published.
           </li>
           <li>
             To update a pinned project, read <span class="mono">version</span> in the metadata, check <span class="mono">changes</span>, and
