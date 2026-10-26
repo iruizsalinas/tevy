@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.wrangler/
+site/public/basis/
+.svelte-kit/
+build/
+site/public/models/
