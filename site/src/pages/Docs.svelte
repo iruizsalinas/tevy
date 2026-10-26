@@ -24,13 +24,13 @@
   const skyUrl = $derived(sky ? `${SITE_URL}${mainFile(sky).path}` : '');
 
   const toc = [
+    ['agents', 'Building with an AI agent'],
     ['urls', 'Files and URLs'],
     ['versions', 'Versions: pinned or latest'],
     ['three-models', 'three.js: models'],
     ['three-skies', 'three.js: skies'],
     ['other', 'Other engines'],
     ['metadata', 'Metadata and indexes'],
-    ['agents', 'Building with an AI agent'],
   ];
 
   // Scrolls to a section without putting a #fragment in the address bar.
@@ -69,6 +69,16 @@
         Every file on tevy is a plain HTTPS download: no account, no API key, and CORS is open, so a browser can load files straight from
         tevy.dev. Everything is <a href="/license">CC0</a>.
       </p>
+
+      <section id="agents">
+        <h2 tabindex="-1">Building with an AI agent</h2>
+        <p>
+          If an AI coding agent writes your code, give it <a class="mono" href="/llms.txt">{SITE_URL}/llms.txt</a>. It is a single text page
+          made for agents: what tevy is, the URL layout, the loader setup and every item with a link to its metadata, so the agent picks
+          real assets and uses working URLs instead of guessing.
+        </p>
+        <p>For example: <span class="mono">Read {SITE_URL}/llms.txt and add a spruce forest along the road using tevy models.</span></p>
+      </section>
 
       <section id="urls">
         <h2 tabindex="-1">Files and URLs</h2>
@@ -187,16 +197,6 @@
           </li>
         </ul>
         <p>You can also download files and host them yourself; CC0 allows any use.</p>
-      </section>
-
-      <section id="agents">
-        <h2 tabindex="-1">Building with an AI agent</h2>
-        <p>
-          If an AI coding agent writes your code, give it <a class="mono" href="/llms.txt">{SITE_URL}/llms.txt</a>. It is a single text page
-          made for agents: what tevy is, the URL layout, the loader setup and every item with a link to its metadata, so the agent picks
-          real assets and uses working URLs instead of guessing.
-        </p>
-        <p>For example: <span class="mono">Read {SITE_URL}/llms.txt and add a spruce forest along the road using tevy models.</span></p>
       </section>
     </article>
   </div>
