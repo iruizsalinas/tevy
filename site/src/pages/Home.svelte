@@ -1,16 +1,16 @@
 <script lang="ts">
+  import Layout from './Layout.svelte';
   import { onMount } from 'svelte';
-  import { replaceState } from '$app/navigation';
   import { SITE_URL, categoryLabel, type Model } from '#lib/models';
   import Icon from '#lib/components/Icon.svelte';
   import ModelCard from '#lib/components/ModelCard.svelte';
   import Segmented from '#lib/components/Segmented.svelte';
 
-  let { data } = $props();
+  let { models: built }: { models: Model[] } = $props();
 
   // Newer list from /models.json, if it differs from the one this page was built with.
   let fetched = $state<Model[] | null>(null);
-  const models = $derived(fetched ?? data.models);
+  const models = $derived(fetched ?? built);
   let category = $state('');
   let query = $state('');
   let ready = $state(false);
@@ -54,7 +54,7 @@
     if (query.trim()) params.set('q', query.trim());
     if (!ready) return;
     const qs = params.toString();
-    replaceState(qs ? `?${qs}` : location.pathname, {});
+    history.replaceState(history.state, '', qs ? `?${qs}` : location.pathname);
   });
 
   function clear() {
@@ -89,6 +89,8 @@
   <meta property="og:image" content="{SITE_URL}/tevy.png" />
 </svelte:head>
 
+<Layout>
+
 <div class="catalog">
   <header class="intro">
     <h1 class="display">Free 3D models, sized for the browser</h1>
@@ -122,6 +124,8 @@
     </div>
   {/if}
 </div>
+
+</Layout>
 
 <style>
   .catalog {

@@ -1,24 +1,26 @@
-import adapter from '@sveltejs/adapter-static';
-import { sveltekit } from '@sveltejs/kit/vite';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { defineConfig } from 'vite';
+import { devPages } from './site/dev.js';
 
-export default defineConfig({
-  plugins: [
-    sveltekit({
-      // Fully static output for Cloudflare Workers static assets.
-      adapter: adapter({ pages: 'dist', assets: 'dist', strict: true }),
-      files: { src: 'site/src', assets: 'site/public' },
-      // Built site files (scripts, styles, fonts, the KTX2 transcoder) go under /assets/.
-      appDir: 'assets',
-      // Root-relative asset URLs: 404.html is served at whatever path was missing.
-      paths: { origin: 'https://tevy.dev', relative: false },
-      prerender: { handleHttpError: 'fail' },
-    }),
-  ],
+// One client entry per page type; each hydrates its prerendered page.
+const entries = {
+  home: 'site/src/client/home.ts',
+  model: 'site/src/client/model.ts',
+  missing: 'site/src/client/missing.ts',
+};
+
+export default defineConfig(({ isSsrBuild }) => ({
+  publicDir: 'site/public',
+  appType: 'custom',
+  plugins: [svelte(), devPages()],
   // KTX2Loader finds its transcoder relative to its own module, which pre-bundling would break.
   optimizeDeps: { exclude: ['three'] },
   build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    manifest: !isSsrBuild,
     // three.js alone is about 700 kB minified; it is loaded lazily by the viewer only.
     chunkSizeWarningLimit: 900,
+    rolldownOptions: isSsrBuild ? {} : { input: entries },
   },
-});
+}));

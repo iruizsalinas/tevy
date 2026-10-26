@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Layout from './Layout.svelte';
   import NotFound from '#lib/components/NotFound.svelte';
 </script>
 
@@ -7,4 +8,6 @@
   <meta name="robots" content="noindex" />
 </svelte:head>
 
-<NotFound />
+<Layout>
+  <NotFound />
+</Layout>

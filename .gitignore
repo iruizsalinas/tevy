@@ -1,6 +1,5 @@
 node_modules/
 dist/
 .wrangler/
-.svelte-kit/
 build/
 site/public/models/

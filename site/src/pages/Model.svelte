@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Layout from './Layout.svelte';
   import {
     CC0_URL,
     SITE_URL,
@@ -10,14 +11,14 @@
     loadSnippet,
     lod0,
     modelUrl,
+    type Model,
   } from '#lib/models';
   import CodeBlock from '#lib/components/CodeBlock.svelte';
   import Icon from '#lib/components/Icon.svelte';
   import Viewer from '#lib/components/Viewer.svelte';
 
-  let { data } = $props();
+  let { model }: { model: Model } = $props();
 
-  const model = $derived(data.model);
   const main = $derived(lod0(model));
   let lod = $state(0);
 
@@ -68,6 +69,8 @@
   <link rel="preload" as="image" href={model.preview} />
   {@html `<script type="application/ld+json">${jsonLd}</script>`}
 </svelte:head>
+
+<Layout>
 
 <div class="page">
   <div class="stage">
@@ -136,6 +139,8 @@
     <CodeBlock title="Load in three.js" code={loadSnippet(model.files[lod] ?? main)} />
   </div>
 </div>
+
+</Layout>
 
 <style>
   .page {

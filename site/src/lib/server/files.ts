@@ -1,9 +1,10 @@
-// /llms.txt in the llmstxt.org format: what tevy is, how to fetch and load models, and an index.
-import { SITE_URL, TRANSCODER_URL, categoryLabel, formatBytes, formatDimensions, lod0, type Model } from '#lib/models';
-import { readModels } from '#lib/server/models';
+// The generated text files: /models.json, /llms.txt (llmstxt.org format), /sitemap.xml, /robots.txt.
+import { SITE_URL, TRANSCODER_URL, categoryLabel, formatBytes, formatDimensions, lod0, modelUrl, type Model } from '#lib/models';
+import { generatedAt } from '#lib/server/models';
 
-export const prerender = true;
-export const trailingSlash = 'never';
+export function modelsJson(models: Model[]): string {
+  return JSON.stringify({ schema: 1, site: SITE_URL, generated: generatedAt(models), count: models.length, models });
+}
 
 function modelLine(m: Model): string {
   const f = lod0(m);
@@ -16,8 +17,7 @@ function modelLine(m: Model): string {
   return `- [${m.name}](${SITE_URL}/models/${m.slug}/model.json): ${facts.join(', ')}. ${m.description}`;
 }
 
-export function GET() {
-  const models = readModels();
+export function llmsTxt(models: Model[]): string {
   const text = `# tevy
 
 > Free, browser-sized 3D models (cars, trees, rocks, props) as compact glTF binary files for three.js and any glTF engine. Every model is CC0 1.0: public domain, free for commercial use, no attribution required.
@@ -65,5 +65,19 @@ Other engines need the same two glTF extensions: meshopt decoding and KTX2 (Basi
 
 ${models.map(modelLine).join('\n')}
 `;
-  return new Response(text, { headers: { 'content-type': 'text/plain; charset=utf-8' } });
+  return text;
+}
+
+export function sitemapXml(models: Model[]): string {
+  const urls = [
+    `  <url><loc>${SITE_URL}/</loc></url>`,
+    ...models.map(
+      (m) => `  <url><loc>${SITE_URL}${modelUrl(m)}</loc>${m.updated ? `<lastmod>${m.updated}</lastmod>` : ''}</url>`,
+    ),
+  ];
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
+}
+
+export function robotsTxt(): string {
+  return `User-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`;
 }
