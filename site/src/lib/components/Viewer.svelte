@@ -1,20 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { formatBytes, type Model } from '#lib/models';
+  import type { Model } from '#lib/models';
   import Icon from './Icon.svelte';
   import Segmented from './Segmented.svelte';
 
   // The interactive 3D view of a model. The prerendered page shows the preview image; three.js
   // loads only after mount and fades in over it.
   let { model, lod = $bindable(0) }: { model: Model; lod?: number } = $props();
-
-  interface Stats {
-    triangles: number;
-    vertices: number;
-    textures: number;
-    maxTexture: number;
-    materials: number;
-  }
 
   let container = $state<HTMLElement>();
   let viewer: any = null;
@@ -24,22 +16,19 @@
   let loading = $state(false);
   let progress = $state<number | null>(null);
   let failed = $state(false);
-  let stats = $state<Stats | null>(null);
   let rotate = $state(true);
   let wire = $state(false);
   let lodValue = $state(String(lod));
   const canFullscreen = typeof document !== 'undefined' && document.fullscreenEnabled;
 
   const choices = $derived(model.files.map((f, i) => ({ value: String(i), label: `LOD${f.lod}` })));
-  const file = $derived(model.files[lod]);
 
   async function show(index: number) {
     if (!viewer) return;
     loading = true;
     failed = false;
     try {
-      const s = await viewer.load(model.files[index].path);
-      if (s && index === lod) stats = s;
+      await viewer.load(model.files[index].path);
       ready = true;
     } catch (err) {
       console.error(err);
@@ -131,16 +120,6 @@
           {/if}
         </div>
       </div>
-
-      {#if stats}
-        <dl class="stats glass mono" aria-live="polite">
-          <div><dt>Triangles</dt><dd>{stats.triangles.toLocaleString('en-US')}</dd></div>
-          <div><dt>Vertices</dt><dd>{stats.vertices.toLocaleString('en-US')}</dd></div>
-          <div><dt>File</dt><dd>{formatBytes(file.bytes)}</dd></div>
-          <div class="extra"><dt>Textures</dt><dd>{stats.textures}{stats.maxTexture ? ` · ${stats.maxTexture}px` : ''}</dd></div>
-          <div class="extra"><dt>Materials</dt><dd>{stats.materials}</dd></div>
-        </dl>
-      {/if}
     </div>
 
     {#if loading || failed}
@@ -245,8 +224,7 @@
     gap: 8px;
   }
 
-  .top > *,
-  .stats {
+  .top > * {
     pointer-events: auto;
   }
 
@@ -279,34 +257,6 @@
   .actions button[aria-pressed='true'] {
     background: var(--accent-soft);
     color: var(--accent-line);
-  }
-
-  .stats {
-    align-self: flex-start;
-    display: flex;
-    flex-wrap: wrap;
-    margin: 0;
-    padding: 7px 2px;
-  }
-
-  .stats div {
-    padding: 0 10px;
-  }
-
-  .stats div + div {
-    border-left: 1px solid rgb(163 122 92 / 0.45);
-  }
-
-  dt {
-    font-size: 10px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--faint);
-  }
-
-  dd {
-    margin: 0;
-    font-size: 12px;
   }
 
   .status {
@@ -380,13 +330,8 @@
       padding: 10px;
     }
 
-    .hint,
-    .extra {
+    .hint {
       display: none;
-    }
-
-    .stats div {
-      padding: 0 8px;
     }
   }
 </style>

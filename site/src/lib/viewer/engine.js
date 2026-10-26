@@ -194,12 +194,11 @@ export class Viewer {
     }
     if (token !== this.loadToken) {
       this.disposeObject(gltf.scene);
-      return null;
+      return;
     }
     const keepView = Boolean(this.model);
     this.setModel(gltf.scene, keepView);
     this.onStatus({ state: 'ready' });
-    return this.stats();
   }
 
   setModel(object, keepView) {
@@ -302,34 +301,6 @@ export class Viewer {
       }
     }
     return dist * 1.06 || 1;
-  }
-
-  stats() {
-    let triangles = 0;
-    let vertices = 0;
-    let meshes = 0;
-    const materials = new Set();
-    const textures = new Set();
-    this.model?.traverse((o) => {
-      if (!o.isMesh || o.userData.tevyOverlay) return;
-      meshes++;
-      const g = o.geometry;
-      const count = g.index ? g.index.count : g.attributes.position.count;
-      const instances = o.isInstancedMesh ? o.count : 1;
-      triangles += (count / 3) * instances;
-      vertices += g.attributes.position.count * instances;
-      for (const m of materialsOf(o)) {
-        materials.add(m);
-        for (const t of textureSlots(m)) textures.add(t.source ?? t);
-      }
-    });
-    let maxTexture = 0;
-    for (const s of textures) {
-      const d = s.data ?? s.image ?? s;
-      const w = d?.width ?? d?.mipmaps?.[0]?.width ?? 0;
-      maxTexture = Math.max(maxTexture, w);
-    }
-    return { triangles: Math.round(triangles), vertices, meshes, materials: materials.size, textures: textures.size, maxTexture };
   }
 
   setAutoRotate(on) {
