@@ -146,7 +146,7 @@
       {#if !query}<kbd aria-hidden="true">/</kbd>{/if}
     </label>
     <p class="count mono" aria-live="polite">
-      {#if home && !searching}{shown.length} featured{:else}{shown.length} {shown.length === 1 ? noun : plural}{/if}
+      {#if !home || searching}{shown.length} {shown.length === 1 ? noun : plural}{/if}
     </p>
     {#if !home && categories.length > 2}
       <div class="categories"><Segmented bind:value={category} choices={categories} label="Category" /></div>
@@ -155,7 +155,7 @@
 
   <h2 class="sr-only">{info ? `All ${plural}` : searching ? 'Search results' : 'Featured'}</h2>
   {#if shown.length}
-    <ul class="grid">
+    <ul class="grid" class:featured={home && !searching}>
       {#each shown as item, i (`${item.kind}/${item.slug}`)}
         <li><ItemCard {item} eager={i < 8} /></li>
       {/each}
@@ -174,6 +174,7 @@
 
 <style>
   .catalog {
+    container-type: inline-size;
     max-width: 1480px;
     margin: 0 auto;
     padding: 0 clamp(16px, 3vw, 32px) 56px;
@@ -324,6 +325,26 @@
     margin: 4px 0 0;
     padding: 0;
     list-style: none;
+  }
+
+  /* Featured fills whole rows: three rows at 3 and 4 columns (5 columns fit all 15), an even
+     count at 2. Breakpoints follow the 230px minimum card width and 12px gap of .grid. */
+  @container (714px <= width < 956px) {
+    .featured > :nth-child(n + 10) {
+      display: none;
+    }
+  }
+
+  @container (956px <= width < 1198px) {
+    .featured > :nth-child(n + 13) {
+      display: none;
+    }
+  }
+
+  @container (width < 714px) {
+    .featured > :nth-child(n + 15) {
+      display: none;
+    }
   }
 
   .empty {
