@@ -41,7 +41,7 @@
       .then((r) => (r.ok ? r.json() : null))
       .then((index) => {
         if (!index || !Array.isArray(index.models)) return;
-        const key = (list: Model[]) => list.map((m) => `${m.slug}@${m.revision ?? 0}`).join();
+        const key = (list: Model[]) => list.map((m) => `${m.slug}@${m.version}@${m.updated ?? ''}`).join();
         if (key(index.models) !== key(models)) fetched = index.models;
       })
       .catch(() => {});

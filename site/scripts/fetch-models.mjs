@@ -25,7 +25,8 @@ const sha256 = (data) => createHash('sha256').update(data).digest('hex');
 const index = JSON.parse((await get('/models.json')).toString('utf8'));
 let downloaded = 0;
 for (const model of index.models) {
-  for (const file of model.files) {
+  // Every version, so a deploy from this checkout keeps serving the older ones.
+  for (const file of model.versions.flatMap((v) => v.files)) {
     const local = join(publicDir, file.path);
     if (existsSync(local) && sha256(readFileSync(local)) === file.sha256) continue;
     const data = await get(file.path);
@@ -35,6 +36,6 @@ for (const model of index.models) {
   }
   save(model.preview, await get(model.preview));
   save(`/models/${model.slug}/model.json`, JSON.stringify(model, null, 2) + '\n');
-  console.log(`${model.slug} r${model.revision}`);
+  console.log(`${model.slug} v${model.version}`);
 }
 console.log(`${index.models.length} models, ${downloaded} files downloaded`);

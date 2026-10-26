@@ -8,14 +8,22 @@ export const CC0_URL = 'https://creativecommons.org/publicdomain/zero/1.0/';
 
 export interface ModelFile {
   lod: number;
-  /** Site-absolute path, e.g. /models/<slug>/<slug>_lod0.glb */
+  /** Site-absolute path, e.g. /models/<slug>/v1/<slug>_lod0.glb */
   path: string;
   bytes: number;
   sha256?: string;
   triangles: number;
 }
 
-/** The content of /models/<slug>/model.json (schema 1). */
+/** One published version of a model. Its files never change once published. */
+export interface ModelVersion {
+  version: number;
+  date: string;
+  changes: string;
+  files: ModelFile[];
+}
+
+/** The content of /models/<slug>/model.json (schema 2). */
 export interface Model {
   schema: number;
   slug: string;
@@ -24,7 +32,9 @@ export interface Model {
   tags?: string[];
   description: string;
   license: string;
-  revision?: number;
+  /** The latest version; `files` are its files. */
+  version: number;
+  changes: string;
   created?: string;
   updated?: string;
   units?: string;
@@ -34,6 +44,8 @@ export interface Model {
   parts?: string[];
   preview: string;
   files: ModelFile[];
+  /** Every version, newest first. */
+  versions: ModelVersion[];
 }
 
 const CATEGORY_LABELS: Record<string, string> = {

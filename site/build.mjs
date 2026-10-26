@@ -43,7 +43,8 @@ function tags(entry) {
   ].join('\n    ');
 }
 
-const { outputs } = await import(pathToFileURL(join(SERVER, 'render.js')).href);
+const { outputs, verify } = await import(pathToFileURL(join(SERVER, 'render.js')).href);
+verify();
 let count = 0;
 const redirects = [];
 for (const out of outputs()) {

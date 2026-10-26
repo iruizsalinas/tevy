@@ -2,7 +2,7 @@
 // Used by site/build.mjs at build time and by the dev server in vite.config.js.
 import type { Component } from 'svelte';
 import { render } from 'svelte/server';
-import { readModels } from '#lib/server/models';
+import { readModels, verifyModelFiles } from '#lib/server/models';
 import { llmsTxt, modelsJson, robotsTxt, sitemapXml } from '#lib/server/files';
 import { modelUrl } from '#lib/models';
 import Catalog from './pages/Catalog.svelte';
@@ -52,4 +52,9 @@ export function outputs(): Output[] {
     { path: '/sitemap.xml', file: 'sitemap.xml', text: sitemapXml(models), type: 'application/xml' },
     { path: '/robots.txt', file: 'robots.txt', text: robotsTxt(), type: 'text/plain; charset=utf-8' },
   ];
+}
+
+/** Build-time check that every published version's files are present and unchanged. */
+export function verify(): void {
+  verifyModelFiles(readModels());
 }

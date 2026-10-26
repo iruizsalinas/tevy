@@ -3,7 +3,7 @@ import { SITE_URL, TRANSCODER_URL, categoryLabel, formatBytes, formatDimensions,
 import { generatedAt } from '#lib/server/models';
 
 export function modelsJson(models: Model[]): string {
-  return JSON.stringify({ schema: 1, site: SITE_URL, generated: generatedAt(models), count: models.length, models });
+  return JSON.stringify({ schema: 2, site: SITE_URL, generated: generatedAt(models), count: models.length, models });
 }
 
 function modelLine(m: Model): string {
@@ -13,6 +13,7 @@ function modelLine(m: Model): string {
     formatDimensions(m.dimensions),
     `LOD0 ${f.triangles.toLocaleString('en-US')} triangles, ${formatBytes(f.bytes)}`,
     `${m.files.length} LOD${m.files.length === 1 ? '' : 's'}`,
+    `version ${m.version}`,
   ].filter(Boolean);
   return `- [${m.name}](${SITE_URL}/models/${m.slug}/model.json): ${facts.join(', ')}. ${m.description}`;
 }
@@ -28,7 +29,8 @@ Models are GLB files with meshopt-compressed geometry (EXT_meshopt_compression) 
 
 - Every file is a plain HTTPS GET: no account and no API key. CORS is open, so browsers can load files straight from ${SITE_URL}.
 - Each model has a metadata file at ${SITE_URL}/models/<slug>/model.json listing its files with LOD, byte size, triangle count and sha256.
-- File URLs: ${SITE_URL}/models/<slug>/<slug>_lod0.glb is full detail; <slug>_lod1.glb and up have fewer triangles.
+- File URLs: ${SITE_URL}/models/<slug>/v<version>/<slug>_lod0.glb is full detail; <slug>_lod1.glb and up have fewer triangles.
+- Versions: a published file never changes. An improved model gets a new version in a new folder (v2, v3, ...) and older versions stay online, so a site that loads v1 keeps getting the same file. \`version\` in model.json is the latest; \`versions\` lists every version, newest first, with its date, a note on what changed, and its files.
 - Slugs are permanent identifiers. Categories may change and are not part of any URL.
 
 ## Load in three.js
@@ -42,7 +44,7 @@ const ktx2 = new KTX2Loader()
   .setTranscoderPath('${TRANSCODER_URL}')
   .detectSupport(renderer);
 const loader = new GLTFLoader().setKTX2Loader(ktx2).setMeshoptDecoder(MeshoptDecoder);
-const gltf = await loader.loadAsync('${SITE_URL}/models/<slug>/<slug>_lod0.glb');
+const gltf = await loader.loadAsync('${SITE_URL}/models/<slug>/v1/<slug>_lod0.glb');
 scene.add(gltf.scene);
 \`\`\`
 

@@ -20,6 +20,7 @@
   let { model }: { model: Model } = $props();
 
   const main = $derived(lod0(model));
+  const older = $derived(model.versions.filter((v) => v.version !== model.version));
   let lod = $state(0);
 
   const url = $derived(`${SITE_URL}${modelUrl(model)}`);
@@ -96,7 +97,11 @@
           <dd class="mono">{model.parts.join(', ')}</dd>
         </div>
       {/if}
-      <div class="wide"><dt>Updated</dt><dd class="mono">{#if model.updated}<time datetime={model.updated}>{model.updated}</time>{:else}-{/if}{#if model.revision}, revision {model.revision}{/if}</dd></div>
+      <div class="wide">
+        <dt>Version</dt>
+        <dd class="mono">v{model.version}{#if model.updated}, <time datetime={model.updated}>{model.updated}</time>{/if}</dd>
+        {#if model.version > 1}<dd class="changes">{model.changes}</dd>{/if}
+      </div>
     </dl>
 
     <section class="downloads" aria-labelledby="downloads-title">
@@ -121,10 +126,30 @@
         {/each}
       </ul>
       <p class="fine">
-        GLB, meshopt geometry, KTX2 textures. Meters, +Y up, front faces +Z.
+        GLB, meshopt geometry, KTX2 textures. Meters, +Y up, front faces +Z. Files of a version
+        never change; improvements ship as a new version.
         <a class="mono" href="/models/{model.slug}/model.json">model.json</a>
       </p>
     </section>
+
+    {#if older.length}
+      <section class="downloads" aria-labelledby="versions-title">
+        <h2 id="versions-title">Older versions</h2>
+        <ul>
+          {#each older as v (v.version)}
+            <li class="version">
+              <span class="lod mono">v{v.version}</span>
+              <span class="meta"><time class="mono" datetime={v.date}>{v.date}</time> · {v.changes}</span>
+              <span class="links mono">
+                {#each v.files as file (file.path)}
+                  <a href={file.path} download={fileName(file.path)} aria-label="Download v{v.version} LOD{file.lod}, {fileName(file.path)}">LOD{file.lod}</a>
+                {/each}
+              </span>
+            </li>
+          {/each}
+        </ul>
+      </section>
+    {/if}
 
     {#if model.tags?.length}
       <ul class="tags" aria-label="Tags">
@@ -286,6 +311,25 @@
 
   .first {
     margin-top: 4px;
+  }
+
+  .changes {
+    color: var(--muted);
+  }
+
+  .version .meta {
+    white-space: normal;
+  }
+
+  .links {
+    display: flex;
+    gap: 8px;
+    font-size: 11.5px;
+  }
+
+  .links a {
+    color: var(--muted);
+    text-underline-offset: 3px;
   }
 
   .fine {
