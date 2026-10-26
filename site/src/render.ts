@@ -44,10 +44,11 @@ function itemPage(item: Item): Page {
 export function outputs(): Output[] {
   const all = readAll();
   const sections = KINDS.filter((k) => all[k.kind].length);
+  const counts = sections.map((k) => ({ kind: k.kind, count: all[k.kind].length }));
   return [
-    { path: '/', file: 'index.html', page: () => page(Catalog, 'catalog', { items: featured(all), kind: null, sections: sections.map((k) => ({ kind: k.kind, count: all[k.kind].length })) }) },
+    { path: '/', file: 'index.html', page: () => page(Catalog, 'catalog', { items: featured(all), kind: null, sections: counts }) },
     ...sections.flatMap(({ kind }) => [
-      { path: `/${kind}`, file: `${kind}/index.html`, page: () => page(Catalog, 'catalog', { items: all[kind], kind, sections: [] }) },
+      { path: `/${kind}`, file: `${kind}/index.html`, page: () => page(Catalog, 'catalog', { items: all[kind], kind, sections: counts }) },
       ...all[kind].map((item) => {
         const path = itemUrl(item);
         return { path, file: `${path.slice(1)}/index.html`, page: () => itemPage(item) };

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { KINDS } from '#lib/catalog';
   import Logo from './Logo.svelte';
 </script>
 
@@ -7,9 +6,6 @@
 <header class="nav">
   <a href="/" class="home" aria-label="tevy home"><Logo size={26} track /><span class="word display">tevy</span></a>
   <span class="spacer"></span>
-  {#each KINDS as k (k.kind)}
-    <a class="btn ghost small" href="/{k.kind}">{k.label}</a>
-  {/each}
   <a class="btn ghost small" href="/license">License</a>
 </header>
 

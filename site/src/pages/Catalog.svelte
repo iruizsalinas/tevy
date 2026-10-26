@@ -1,14 +1,15 @@
 <script lang="ts">
   import Layout from './Layout.svelte';
   import { onMount } from 'svelte';
-  import { KINDS, kindInfo, type Item, type Kind } from '#lib/catalog';
+  import { kindInfo, type Item, type Kind } from '#lib/catalog';
   import { SITE_URL, categoryLabel } from '#lib/models';
   import Icon from '#lib/components/Icon.svelte';
   import ItemCard from '#lib/components/ItemCard.svelte';
   import Segmented from '#lib/components/Segmented.svelte';
 
-  // One catalog page for every section (/models, /skies) and for the featured home page (kind null),
-  // where items from all sections are mixed and the filter picks a section instead of a category.
+  // One catalog page for the featured home page (kind null) and every section (/models, /skies).
+  // The tabs link between them; a section page also filters by category. Searching on the home
+  // page searches every section.
   let {
     items: built,
     kind,
@@ -29,54 +30,65 @@
 
   // Newer list from /<kind>.json, if it differs from the one this page was built with.
   let fetched = $state<Item[] | null>(null);
-  const items = $derived(fetched ?? built);
-  let filter = $state('');
+  // Every item of every section, loaded on the home page once a search starts.
+  let everything = $state<Item[] | null>(null);
+  let category = $state('');
   let query = $state('');
   let ready = $state(false);
   let search = $state<HTMLInputElement>();
-  // The home page filters by section, a section page by category.
-  const param = $derived(home ? 'section' : 'category');
-  const groupOf = (item: Item) => (home ? item.kind : item.category);
-  const groupLabel = (value: string) => (home ? kindInfo(value as Kind).label : categoryLabel(value));
+  const searching = $derived(query.trim().length > 0);
+  const items = $derived(home && searching && everything ? everything : (fetched ?? built));
 
-  const choices = $derived([
+  const categories = $derived([
     { value: '', label: 'All' },
-    ...[...new Set(items.map(groupOf))].sort().map((value) => ({ value, label: groupLabel(value) })),
+    ...[...new Set(items.map((m) => m.category))].sort().map((value) => ({ value, label: categoryLabel(value) })),
   ]);
 
   const shown = $derived.by(() => {
     const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
     return items.filter((m) => {
-      if (filter && groupOf(m) !== filter) return false;
+      if (category && m.category !== category) return false;
       const hay = [m.name, m.slug, m.category, ...(m.tags ?? [])].join(' ').toLowerCase();
       return terms.every((t) => hay.includes(t));
     });
   });
 
+  async function loadSection(section: Kind): Promise<Item[] | null> {
+    try {
+      const r = await fetch(`/${section}.json`, { cache: 'no-cache' });
+      const list = r.ok ? (await r.json())?.[section] : null;
+      return Array.isArray(list) ? list.map((m: object) => ({ ...m, kind: section }) as Item) : null;
+    } catch {
+      return null;
+    }
+  }
+
   onMount(() => {
     const params = new URLSearchParams(location.search);
-    filter = params.get(param) ?? '';
+    if (kind) category = params.get('category') ?? '';
     query = params.get('search') ?? '';
     ready = true;
 
     // Pick up items published after this page was built.
     if (!kind) return;
-    const section = kind;
-    fetch(`/${section}.json`, { cache: 'no-cache' })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((index) => {
-        const list = index?.[section];
-        if (!Array.isArray(list)) return;
-        const key = (l: { slug: string; version: number; updated?: string }[]) => l.map((m) => `${m.slug}@${m.version}@${m.updated ?? ''}`).join();
-        if (key(list) !== key(items)) fetched = list.map((m: object) => ({ ...m, kind: section }) as Item);
-      })
-      .catch(() => {});
+    loadSection(kind).then((list) => {
+      const key = (l: Item[]) => l.map((m) => `${m.slug}@${m.version}@${m.updated ?? ''}`).join();
+      if (list && key(list) !== key(items)) fetched = list;
+    });
+  });
+
+  $effect(() => {
+    if (!home || !searching || everything) return;
+    everything = [];
+    Promise.all(sections.map((s) => loadSection(s.kind))).then((lists) => {
+      everything = lists.flatMap((l) => l ?? []);
+    });
   });
 
   // Keep the filters in the address bar so filtered views can be shared.
   $effect(() => {
     const params = new URLSearchParams();
-    if (filter) params.set(param, filter);
+    if (category) params.set('category', category);
     if (query.trim()) params.set('search', query.trim());
     if (!ready) return;
     const qs = params.toString();
@@ -84,7 +96,7 @@
   });
 
   function clear() {
-    filter = '';
+    category = '';
     query = '';
   }
 
@@ -116,41 +128,43 @@
 
 <div class="catalog">
   <header class="intro">
-    {#if info}
-      <h1 class="display">All {plural}</h1>
-      <p>{info.blurb}</p>
-    {:else}
-      <h1 class="display">Featured</h1>
-      <p>
-        Free, browser-sized assets for three.js and any glTF engine, CC0 for any use. Browse
-        {#each sections as s, i (s.kind)}{#if i}{i === sections.length - 1 ? ' or ' : ', '}{/if}<a href="/{s.kind}">all {s.count} {kindInfo(s.kind).label.toLowerCase()}</a>{/each}.
-      </p>
-    {/if}
+    <h1 class="display">{info ? info.label : 'Free assets for the web'}</h1>
+    <p>{info ? info.blurb : 'Browser-sized 3D models and HDR skies for three.js and any glTF engine, CC0 for any use.'}</p>
   </header>
 
   <div class="toolbar">
-    {#if choices.length > 2}
-      <Segmented bind:value={filter} {choices} label={home ? 'Section' : 'Category'} />
-    {/if}
+    <nav class="tabs" aria-label="Sections">
+      <a href="/" aria-current={home ? 'page' : undefined}>Featured</a>
+      {#each sections as s (s.kind)}
+        <a href="/{s.kind}" aria-current={kind === s.kind ? 'page' : undefined}>{kindInfo(s.kind).label}<span class="n mono">{s.count}</span></a>
+      {/each}
+    </nav>
     <label class="search">
       <Icon name="search" size={15} />
-      <span class="sr-only">Search {plural}</span>
-      <input bind:this={search} bind:value={query} type="search" placeholder="Search {plural}" autocomplete="off" spellcheck="false" />
+      <span class="sr-only">Search {home ? 'everything' : plural}</span>
+      <input bind:this={search} bind:value={query} type="search" placeholder="Search {home ? 'everything' : plural}" autocomplete="off" spellcheck="false" />
       {#if !query}<kbd aria-hidden="true">/</kbd>{/if}
     </label>
-    <p class="count mono" aria-live="polite">{shown.length} {shown.length === 1 ? noun : plural}</p>
+    <p class="count mono" aria-live="polite">
+      {#if home && !searching}{shown.length} featured{:else}{shown.length} {shown.length === 1 ? noun : plural}{/if}
+    </p>
+    {#if !home && categories.length > 2}
+      <div class="categories"><Segmented bind:value={category} choices={categories} label="Category" /></div>
+    {/if}
   </div>
 
-  <h2 class="sr-only">{info ? `All ${plural}` : 'Featured'}</h2>
+  <h2 class="sr-only">{info ? `All ${plural}` : searching ? 'Search results' : 'Featured'}</h2>
   {#if shown.length}
     <ul class="grid">
       {#each shown as item, i (`${item.kind}/${item.slug}`)}
-        <li><ItemCard {item} eager={i < 8} label={home && KINDS.length > 1 && item.kind !== 'models' ? kindInfo(item.kind).singular : ''} /></li>
+        <li><ItemCard {item} eager={i < 8} label={home && item.kind !== 'models' ? kindInfo(item.kind).singular : ''} /></li>
       {/each}
     </ul>
+  {:else if home && searching && everything?.length === 0}
+    <div class="empty"><p>Searching…</p></div>
   {:else}
     <div class="empty">
-      <p>No {plural} match your search.</p>
+      <p>Nothing matches your search.</p>
       <button type="button" class="btn" onclick={clear}>Clear filters</button>
     </div>
   {/if}
@@ -180,12 +194,6 @@
     font-size: 15px;
   }
 
-  .intro a {
-    color: var(--text);
-    text-underline-offset: 3px;
-    text-decoration-color: var(--line-strong);
-  }
-
   .toolbar {
     position: sticky;
     top: 56px;
@@ -196,6 +204,51 @@
     gap: 10px;
     padding: 10px 0;
     background: var(--bg);
+  }
+
+  .tabs {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: var(--canvas);
+  }
+
+  .tabs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 30px;
+    padding: 0 13px;
+    border-radius: 6px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background 0.12s,
+      color 0.12s;
+  }
+
+  .tabs a:hover {
+    background: var(--hover);
+    color: var(--text);
+  }
+
+  .tabs a[aria-current='page'] {
+    background: var(--accent-soft);
+    color: var(--text);
+  }
+
+  .tabs .n {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--faint);
+  }
+
+  .categories {
+    flex: 1 1 100%;
   }
 
   .search {
