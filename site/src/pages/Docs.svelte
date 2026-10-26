@@ -75,7 +75,7 @@
         <table class="paths">
           <tbody>
             <tr><td class="mono">/models/&lt;slug&gt;</td><td>The page, with a preview and the downloads.</td></tr>
-            <tr><td class="mono">/models/&lt;slug&gt;/model.json</td><td>Metadata: files, sizes, sha256, versions. Skies have sky.json.</td></tr>
+            <tr><td class="mono">/models/&lt;slug&gt;.json</td><td>Metadata: files, sizes, sha256, versions.</td></tr>
             <tr><td class="mono">/models/&lt;slug&gt;/v1/lod0.glb</td><td>A file of version 1. It never changes.</td></tr>
             <tr><td class="mono">/models/&lt;slug&gt;/lod0.glb</td><td>The same file of the latest version.</td></tr>
             <tr><td class="mono">/models.json</td><td>Every model's metadata in one file.</td></tr>
@@ -133,7 +133,7 @@
         <h3>Units and moving parts</h3>
         <p>
           Units are meters, +Y is up and the front faces +Z. Moving pieces such as wheels, doors and steering wheels are separate nodes with
-          their origin at the pivot and stable names, listed in <span class="mono">parts</span> in model.json.
+          their origin at the pivot and stable names, listed in <span class="mono">parts</span> in the model's metadata.
         </p>
         <CodeBlock title="Turn a wheel" code={THREE_PARTS_SNIPPET} />
       </section>
@@ -144,7 +144,7 @@
           <p>
             Skies are Ultra HDR JPEGs: a normal JPEG with an HDR gain map, a fraction of the size of an .hdr file. One file is both the
             background and the lighting. The sun is in the image, so reflections and soft light come for free; for sharp shadows add a light
-            from the sun values in sky.json.
+            from the sun values in the sky's metadata.
           </p>
           <CodeBlock title="Use a sky" code={threeSkySnippet(skyUrl, sky)} />
           <p>
@@ -173,7 +173,7 @@
         <h2 tabindex="-1">Metadata and indexes</h2>
         <ul>
           <li>
-            <a class="mono" href="/models/{model.slug}/model.json">model.json</a> and <span class="mono">sky.json</span> describe the latest version.
+            An item's metadata, such as <a class="mono" href="/models/{model.slug}.json">/models/{model.slug}.json</a>, describes the latest version.
             <span class="mono">versions</span> lists every version, newest first, with its date, what changed and its files.
           </li>
           <li>

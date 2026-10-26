@@ -46,7 +46,7 @@ export function threeSkySnippet(url: string, sky: { exposure?: number; sun?: { d
     sun?.direction && sun.illuminance
       ? `
 
-// The sun as a light of its own, for shadows (values from sky.json).
+// The sun as a light of its own, for shadows (values from the sky's .json file).
 const sun = new DirectionalLight(new Color(${(sun.color ?? [1, 1, 1]).join(', ')}), ${sun.illuminance});
 sun.position.set(${sun.direction.join(', ')}).multiplyScalar(100);
 sun.castShadow = true;

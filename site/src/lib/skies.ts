@@ -21,7 +21,7 @@ export interface SkyVersion {
   files: SkyFile[];
 }
 
-/** The content of /skies/<slug>/sky.json (schema 2). */
+/** The content of /skies/<slug>.json (schema 2). */
 export interface Sky {
   schema: number;
   slug: string;

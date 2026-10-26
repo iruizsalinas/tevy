@@ -18,7 +18,7 @@ function modelLine(m: Model): string {
     `${m.files.length} LOD${m.files.length === 1 ? '' : 's'}`,
     `version ${m.version}`,
   ].filter(Boolean);
-  return `- [${m.name}](${SITE_URL}/models/${m.slug}/model.json): ${facts.join(', ')}. ${m.description}`;
+  return `- [${m.name}](${SITE_URL}/models/${m.slug}.json): ${facts.join(', ')}. ${m.description}`;
 }
 
 function skyLine(s: Sky): string {
@@ -28,7 +28,7 @@ function skyLine(s: Sky): string {
     s.sun ? `sun elevation ${s.sun.elevation}°` : '',
     `version ${s.version}`,
   ].filter(Boolean);
-  return `- [${s.name}](${SITE_URL}/skies/${s.slug}/sky.json): ${facts.join(', ')}. ${s.description}`;
+  return `- [${s.name}](${SITE_URL}/skies/${s.slug}.json): ${facts.join(', ')}. ${s.description}`;
 }
 
 export function llmsTxt(all: Record<Kind, Item[]>): string {
@@ -49,7 +49,7 @@ export function llmsTxt(all: Record<Kind, Item[]>): string {
 
 GLB files with meshopt-compressed geometry (EXT_meshopt_compression) and KTX2 textures (KHR_texture_basisu), each with several levels of detail.
 
-- Metadata: ${SITE_URL}/models/<slug>/model.json lists the files with LOD, byte size, triangle count and sha256.
+- Metadata: ${SITE_URL}/models/<slug>.json lists the files with LOD, byte size, triangle count and sha256.
 - Files: ${SITE_URL}/models/<slug>/v<version>/lod0.glb is full detail; lod1.glb and up have fewer triangles.
 - Units are meters, +Y is up, and the front of a model faces +Z. \`dimensions\` is the bounding box size in meters.
 - \`parts\` lists named nodes. Moving pieces (wheels, doors, steering wheels) are separate nodes with their origin at the pivot and stable names such as wheel_FL, wheel_FR, wheel_RL and wheel_RR.
@@ -74,7 +74,7 @@ Other engines need the same two glTF extensions: meshopt decoding and KTX2 (Basi
 
 Equirectangular HDR panoramas, +Y up, usable as scene background and as image-based lighting. The sun is part of the image.
 
-- Metadata: ${SITE_URL}/skies/<slug>/sky.json lists the files (role \`environment\`: full size for background and lighting; \`lighting\`: smaller, for lighting only), the sun direction and a suggested tone mapping exposure.
+- Metadata: ${SITE_URL}/skies/<slug>.json lists the files (role \`environment\`: full size for background and lighting; \`lighting\`: smaller, for lighting only), the sun direction and a suggested tone mapping exposure.
 - Files are Ultra HDR JPEGs (an 8-bit JPEG with an HDR gain map): ${SITE_URL}/skies/<slug>/v<version>/2k.jpg and 1k.jpg.
 
 \`\`\`js
@@ -90,7 +90,7 @@ scene.environment = sky;
 ## Index
 
 - [Featured](${SITE_URL}/): a selection from every section
-${KINDS.map((k) => `- [${k.label}](${SITE_URL}/${k.kind}): the catalog, searchable with ?search=<words> and ?category=<category>\n- [${k.kind}.json](${SITE_URL}/${k.kind}.json): every ${k.meta} in one file, sorted by slug`).join('\n')}
+${KINDS.map((k) => `- [${k.label}](${SITE_URL}/${k.kind}): the catalog, searchable with ?search=<words> and ?category=<category>\n- [${k.kind}.json](${SITE_URL}/${k.kind}.json): every ${k.singular}'s metadata in one file, sorted by slug`).join('\n')}
 - [Docs](${SITE_URL}/docs): loading in three.js and other engines, and pinned versus latest versions
 - [License](${SITE_URL}/license): what CC0 1.0 allows
 

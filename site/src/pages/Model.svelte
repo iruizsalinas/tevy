@@ -55,7 +55,7 @@
   <title>{model.name}: free CC0 3D model (GLB) | tevy</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={url} />
-  <link rel="alternate" type="application/json" href="/models/{model.slug}/model.json" />
+  <link rel="alternate" type="application/json" href="/models/{model.slug}.json" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="tevy" />
   <meta property="og:title" content="{model.name}: free CC0 3D model" />
@@ -127,7 +127,7 @@
       <p class="fine">
         GLB, meshopt geometry, KTX2 textures. Meters, +Y up, front faces +Z. Files of a version
         never change; improvements ship as a new version.
-        <a class="mono" href="/models/{model.slug}/model.json">model.json</a>
+        <a class="mono" href="/models/{model.slug}.json">{model.slug}.json</a>
       </p>
     </section>
 

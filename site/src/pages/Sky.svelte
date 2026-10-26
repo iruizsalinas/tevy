@@ -38,7 +38,7 @@
   <title>{sky.name}: free CC0 HDR sky | tevy</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={url} />
-  <link rel="alternate" type="application/json" href="/skies/{sky.slug}/sky.json" />
+  <link rel="alternate" type="application/json" href="/skies/{sky.slug}.json" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="tevy" />
   <meta property="og:title" content="{sky.name}: free CC0 HDR sky" />
@@ -110,7 +110,7 @@
       <p class="fine">
         Equirectangular, +Y up, {formatLabel(main.format)}: a JPEG with an HDR gain map, so it opens as a
         normal image too. Files of a version never change; improvements ship as a new version.
-        <a class="mono" href="/skies/{sky.slug}/sky.json">sky.json</a>
+        <a class="mono" href="/skies/{sky.slug}.json">{sky.slug}.json</a>
       </p>
     </section>
 

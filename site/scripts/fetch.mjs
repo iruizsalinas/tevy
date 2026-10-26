@@ -8,10 +8,7 @@ import { dirname, join, resolve } from 'node:path';
 
 const base = (process.argv[2] ?? 'https://tevy.dev').replace(/\/$/, '');
 const publicDir = resolve(import.meta.dirname, '..', 'public');
-const SECTIONS = [
-  { kind: 'models', meta: 'model.json' },
-  { kind: 'skies', meta: 'sky.json' },
-];
+const SECTIONS = ['models', 'skies'];
 
 async function get(path) {
   const res = await fetch(base + path);
@@ -27,7 +24,7 @@ function save(path, data) {
 
 const sha256 = (data) => createHash('sha256').update(data).digest('hex');
 
-for (const { kind, meta } of SECTIONS) {
+for (const kind of SECTIONS) {
   const res = await fetch(`${base}/${kind}.json`);
   if (res.status === 404) {
     console.log(`${kind}: not published`);
@@ -47,7 +44,7 @@ for (const { kind, meta } of SECTIONS) {
       downloaded++;
     }
     save(item.preview, await get(item.preview));
-    save(`/${kind}/${item.slug}/${meta}`, JSON.stringify(item, null, 2) + '\n');
+    save(`/${kind}/${item.slug}.json`, JSON.stringify(item, null, 2) + '\n');
     console.log(`${kind}/${item.slug} v${item.version}`);
   }
   console.log(`${items.length} ${kind}, ${downloaded} files downloaded`);

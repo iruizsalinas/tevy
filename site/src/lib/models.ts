@@ -23,7 +23,7 @@ export interface ModelVersion {
   files: ModelFile[];
 }
 
-/** The content of /models/<slug>/model.json (schema 2). */
+/** The content of /models/<slug>.json (schema 2). */
 export interface Model {
   schema: number;
   slug: string;

@@ -1,6 +1,6 @@
-// Build-time access to the published items in site/public/<kind>/<slug>/<meta>.
+// Build-time access to the published items: site/public/<kind>/<slug>.json, files in <kind>/<slug>/.
 import { createHash } from 'node:crypto';
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { KINDS, type Item, type Kind } from '#lib/catalog';
 import { FEATURED } from '../../featured';
@@ -11,13 +11,13 @@ const PUBLIC_DIR = resolve('site/public');
 export function readItems(kind: Kind): Item[] {
   const dir = join(PUBLIC_DIR, kind);
   if (!existsSync(dir)) return [];
-  const { meta } = KINDS.find((k) => k.kind === kind)!;
   const items: Item[] = [];
-  for (const slug of readdirSync(dir)) {
-    const file = join(dir, slug, meta);
-    if (!statSync(join(dir, slug)).isDirectory() || !existsSync(file)) continue;
+  for (const name of readdirSync(dir)) {
+    if (!name.endsWith('.json')) continue;
+    const slug = name.slice(0, -'.json'.length);
+    const file = join(dir, name);
     const item = { ...JSON.parse(readFileSync(file, 'utf8')), kind } as Item;
-    if (item.slug !== slug) throw new Error(`${file}: slug "${item.slug}" does not match its folder`);
+    if (item.slug !== slug) throw new Error(`${file}: slug "${item.slug}" does not match its file name`);
     if (!Array.isArray(item.files) || item.files.length === 0) throw new Error(`${file}: no files`);
     if (!Array.isArray(item.versions) || !item.versions.some((v) => v.version === item.version)) {
       throw new Error(`${file}: versions must list the current version ${item.version}`);
