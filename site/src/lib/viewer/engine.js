@@ -1,4 +1,5 @@
 import {
+  AnimationMixer,
   Box3,
   CanvasTexture,
   Color,
@@ -28,6 +29,8 @@ import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
+import { makeMoves, PAIRS } from './moves.js';
 
 // Camera direction for the initial view: front three-quarter (assets face +Z), slightly above.
 const VIEW_DIR = new Vector3(0.62, 0.36, 1).normalize();
@@ -161,6 +164,12 @@ export class Viewer {
     this.timer.update(time);
     const dt = Math.min(this.timer.getDelta(), 0.1);
     const moved = this.controls.update(dt);
+    if (this.action) {
+      if (this.shuffling && (this.shuffleLeft -= dt) <= 0) this.playNext();
+      this.mixer.update(dt);
+      this.partner?.mixer.update(dt);
+      this.dirty = true;
+    }
     if (moved || this.dirty) {
       this.renderer.render(this.scene, this.camera);
       this.dirty = false;
@@ -197,17 +206,25 @@ export class Viewer {
       return;
     }
     const keepView = Boolean(this.model);
-    this.setModel(gltf.scene, keepView);
+    this.setModel(gltf.scene, keepView, gltf.animations);
     this.onStatus({ state: 'ready' });
   }
 
-  setModel(object, keepView) {
+  setModel(object, keepView, animations = []) {
     if (this.model) {
       this.scene.remove(this.model);
       this.disposeObject(this.model);
     }
     this.model = object;
+    this.shuffling = false;
+    this.setPartner(null);
+    this.mixer?.stopAllAction();
+    this.mixer = null;
+    this.action = null;
+    this.clips = new Map();
     object.traverse((o) => {
+      // A pose can take a limb past the bind pose's bounds; keep skinned meshes from being culled.
+      if (o.isSkinnedMesh) o.frustumCulled = false;
       if (!o.isMesh) return;
       o.castShadow = true;
       o.receiveShadow = true;
@@ -228,16 +245,44 @@ export class Viewer {
 
     object.updateMatrixWorld(true);
     const box = new Box3().setFromObject(object);
+    // People get the shipped clips plus moves made in code; a jump or raised arms need headroom.
+    const moves = animations.length ? makeMoves(object) : [];
+    for (const clip of [...animations, ...moves]) this.clips.set(clip.name, clip);
+    let fitBox = box;
+    if (this.clips.size) {
+      this.mixer = new AnimationMixer(object);
+      if (moves.length) box.max.y += box.getSize(new Vector3()).y * 0.3;
+      // Frame room for the partner of a pair move up front, so the camera holds still when one joins.
+      // The room is kept on both sides so the view stays centered on the person.
+      fitBox = box.clone();
+      const center = box.getCenter(new Vector3()).setY(0);
+      for (const name of Object.keys(PAIRS)) {
+        if (!this.clips.has(name)) continue;
+        const { object: partner } = this.makePartner(this.clips.get(name), PAIRS[name]);
+        for (const side of [1, -1]) {
+          partner.position.sub(center).multiplyScalar(side).add(center);
+          partner.updateMatrixWorld(true);
+          fitBox.union(box.clone().applyMatrix4(partner.matrixWorld));
+        }
+      }
+    }
+    this.fitTo(fitBox, !keepView, box);
+  }
+
+  /** Frames the camera, ground and sun shadow on a box, and the contact shadow on the model's own box. */
+  fitTo(box, resetView, modelBox = box) {
     const sphere = box.getBoundingSphere(new Sphere());
     this.fit = { box, sphere };
 
     const r = sphere.radius || 1;
     const floorY = box.min.y;
-    const size = box.getSize(new Vector3());
+    const size = modelBox.getSize(new Vector3());
+    const middle = modelBox.getCenter(new Vector3());
     this.ground.position.set(sphere.center.x, floorY, sphere.center.z);
     this.ground.scale.setScalar(r * 30);
-    this.contact.position.set(sphere.center.x, floorY + r * 0.002, sphere.center.z);
-    this.contact.scale.set(size.x * 1.35 + r * 0.2, size.z * 1.35 + r * 0.2, 1);
+    this.contact.position.set(middle.x, floorY + r * 0.002, middle.z);
+    const pad = modelBox.getBoundingSphere(new Sphere()).radius * 0.2;
+    this.contact.scale.set(size.x * 1.35 + pad, size.z * 1.35 + pad, 1);
 
     const sun = this.sun;
     sun.target.position.copy(sphere.center);
@@ -251,7 +296,7 @@ export class Viewer {
     sun.shadow.bias = -0.0004;
     sun.shadow.normalBias = r * 0.004;
 
-    this.frame(!keepView);
+    this.frame(resetView);
     this.dirty = true;
   }
 
@@ -301,6 +346,92 @@ export class Viewer {
       }
     }
     return dist * 1.06 || 1;
+  }
+
+  /** Names of the clips this model can play, shipped ones first. */
+  clipNames() {
+    return [...this.clips.keys()];
+  }
+
+  /** Keeps playing clips in a random order, a few seconds each, starting with idle when there is one. */
+  shuffle() {
+    if (!this.mixer) return;
+    this.shuffling = true;
+    this.playNext(this.clips.has('idle') ? 'idle' : null);
+  }
+
+  playNext(name) {
+    const names = this.clipNames().filter((n) => n !== this.action?.getClip().name);
+    const next = name ?? names[Math.floor(Math.random() * names.length)];
+    const { duration } = this.clips.get(next);
+    // Whole loops, about four seconds in all.
+    this.shuffleLeft = Math.max(1, Math.round(4 / duration)) * duration;
+    this.play(next);
+  }
+
+  /** Plays a clip by name on a loop, blending from the one playing; null returns to the bind pose. */
+  play(name) {
+    if (!this.mixer) return;
+    const clip = name ? this.clips.get(name) : null;
+    const next = clip ? this.mixer.clipAction(clip) : null;
+    if (next === this.action) return;
+    const prev = this.action;
+    this.setPartner(clip && name in PAIRS ? this.makePartner(clip, PAIRS[name]) : null);
+    if (next) {
+      next.reset().play();
+      if (prev) next.crossFadeFrom(prev, 0.35, false);
+    } else {
+      this.mixer.stopAllAction();
+      this.model.traverse((o) => o.isSkinnedMesh && o.skeleton.pose());
+    }
+    this.action = next;
+    this.dirty = true;
+  }
+
+  /**
+   * A second person for a pair move: a copy turned to face the model, placed so both right hands
+   * meet at the given time of the clip.
+   */
+  makePartner(clip, meetAt) {
+    const probe = new AnimationMixer(this.model);
+    probe.clipAction(clip).play();
+    probe.update(meetAt);
+    this.model.updateMatrixWorld(true);
+    const hand = this.model.getObjectByName('hand_R');
+    const palm = hand.getWorldPosition(new Vector3());
+    const finger = this.model.getObjectByName('middle_01_R');
+    if (finger) palm.lerp(finger.getWorldPosition(new Vector3()), 0.6);
+    probe.stopAllAction();
+    probe.uncacheRoot(this.model);
+
+    const object = cloneSkinned(this.model);
+    object.traverse((o) => {
+      if (o.isSkinnedMesh) o.frustumCulled = false;
+      delete o.userData.tevyWire;
+    });
+    object.children.forEach(function strip(o) {
+      for (const c of [...o.children]) c.userData.tevyOverlay ? o.remove(c) : strip(c);
+    });
+    // A half turn about the vertical line through the meeting point puts the partner's right hand there too.
+    object.rotation.y = Math.PI;
+    object.position.set(2 * palm.x, 0, 2 * palm.z);
+    const mixer = new AnimationMixer(object);
+    return { object, mixer, clip };
+  }
+
+  setPartner(partner) {
+    if (!partner && !this.partner) return;
+    if (this.partner) {
+      this.partner.mixer.stopAllAction();
+      // The copy shares geometry and materials with the model, so it is removed, not disposed.
+      this.scene.remove(this.partner.object);
+    }
+    this.partner = partner;
+    if (partner) {
+      this.scene.add(partner.object);
+      // Starts in step with the model's clip, which restarts at the same time.
+      partner.mixer.clipAction(partner.clip).play();
+    }
   }
 
   setAutoRotate(on) {

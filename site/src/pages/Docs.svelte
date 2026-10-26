@@ -206,7 +206,8 @@
             People are skinned meshes on one shared 55-joint skeleton, with their clips in the same file: <span class="mono">idle</span>,
             <span class="mono">walk</span>, <span class="mono">wave</span> and <span class="mono">look_around</span>. Every level of detail keeps
             the skeleton and the clips. Joint names are stable, so you can attach things to them, such as a bag to
-            <span class="mono">hand_R</span>.
+            <span class="mono">hand_R</span>. Because the skeleton is shared, a move made in code fits every person: the viewer's dance, cheer,
+            jump, clap and high five are a few joint rotations keyed with three.js, with no change to the files.
           </p>
           <CodeBlock title="Play a walk" code={threeAnimationSnippet(`${SITE_URL}${lod0(person).path}`)} />
         {/if}

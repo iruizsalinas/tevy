@@ -29,6 +29,10 @@
     failed = false;
     try {
       await viewer.load(model.files[index].path);
+      // People keep moving: their clips and moves made in code, in a random order. With reduced
+      // motion they only stand at ease.
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) viewer.play('idle');
+      else viewer.shuffle();
       ready = true;
     } catch (err) {
       console.error(err);
