@@ -45,7 +45,12 @@ function tags(entry) {
 
 const { outputs } = await import(pathToFileURL(join(SERVER, 'render.js')).href);
 let count = 0;
+const redirects = [];
 for (const out of outputs()) {
+  if (out.redirect) {
+    redirects.push(`${out.path} ${out.redirect} 302`);
+    continue;
+  }
   const file = join(OUT, out.file);
   mkdirSync(dirname(file), { recursive: true });
   if (out.text !== undefined) writeFileSync(file, out.text);
@@ -55,4 +60,5 @@ for (const out of outputs()) {
   }
   count++;
 }
+if (redirects.length) writeFileSync(join(OUT, '_redirects'), redirects.map((r) => `${r}\n`).join(''));
 console.log(`prerendered ${count} files into dist/`);

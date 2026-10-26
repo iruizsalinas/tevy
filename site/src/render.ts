@@ -6,7 +6,6 @@ import { readModels } from '#lib/server/models';
 import { llmsTxt, modelsJson, robotsTxt, sitemapXml } from '#lib/server/files';
 import { modelUrl } from '#lib/models';
 import Catalog from './pages/Catalog.svelte';
-import Home from './pages/Home.svelte';
 import License from './pages/License.svelte';
 import Missing from './pages/Missing.svelte';
 import Model from './pages/Model.svelte';
@@ -26,6 +25,8 @@ export interface Output {
   file: string;
   /** Renders the page; lazy so the dev server only renders what is requested. */
   page?: () => Page;
+  /** Redirect target; the build writes these into _redirects. */
+  redirect?: string;
   text?: string;
   type?: string;
 }
@@ -38,7 +39,7 @@ function page<P extends Record<string, unknown>>(component: Component<P>, entry:
 export function outputs(): Output[] {
   const models = readModels();
   return [
-    { path: '/', file: 'index.html', page: () => page(Home, 'home', { models }) },
+    { path: '/', file: '', redirect: '/models/' },
     { path: '/models/', file: 'models/index.html', page: () => page(Catalog, 'catalog', { models }) },
     { path: '/license/', file: 'license/index.html', page: () => page(License, 'license', {}) },
     ...models.map((model) => {

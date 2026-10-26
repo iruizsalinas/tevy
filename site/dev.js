@@ -15,6 +15,11 @@ export function devPages() {
             const all = outputs();
             const found = all.find((o) => o.path === path);
             const out = found ?? all.find((o) => o.path === '/404.html');
+            if (out.redirect) {
+              res.writeHead(302, { location: out.redirect });
+              res.end();
+              return;
+            }
             res.statusCode = found ? 200 : 404;
             if (out.text !== undefined) {
               res.setHeader('content-type', out.type);
