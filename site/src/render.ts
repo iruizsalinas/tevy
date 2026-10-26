@@ -2,14 +2,17 @@
 // Used by site/build.mjs at build time and by the dev server in vite.config.js.
 import type { Component } from 'svelte';
 import { render } from 'svelte/server';
-import { KINDS, itemUrl, latestPath, type Item } from '#lib/catalog';
-import { featured, readAll, verifyFiles } from '#lib/server/catalog';
+import { KINDS, itemUrl, latestPath, type Item, type Kind } from '#lib/catalog';
+import type { Model } from '#lib/models';
+import type { Sky } from '#lib/skies';
+import { featured, published, readAll, verifyFiles } from '#lib/server/catalog';
 import { indexJson, llmsTxt, robotsTxt, sitemapXml } from '#lib/server/files';
 import Catalog from './pages/Catalog.svelte';
+import Docs from './pages/Docs.svelte';
 import License from './pages/License.svelte';
 import Missing from './pages/Missing.svelte';
-import Model from './pages/Model.svelte';
-import Sky from './pages/Sky.svelte';
+import ModelPage from './pages/Model.svelte';
+import SkyPage from './pages/Sky.svelte';
 
 /** A page: rendered Svelte markup plus the client entry (site/src/client/<entry>.ts) that hydrates it. */
 export interface Page {
@@ -40,7 +43,15 @@ function page<P extends Record<string, unknown>>(component: Component<P>, entry:
 }
 
 function itemPage(item: Item): Page {
-  return item.kind === 'models' ? page(Model, 'model', { model: item }) : page(Sky, 'sky', { sky: item });
+  return item.kind === 'models' ? page(ModelPage, 'model', { model: item }) : page(SkyPage, 'sky', { sky: item });
+}
+
+/** The model and sky the docs use in their examples: the first featured of each. */
+function docsExamples(all: Record<Kind, Item[]>) {
+  const picks = featured(all);
+  const model = picks.find((i) => i.kind === 'models') ?? all.models[0];
+  const sky = picks.find((i) => i.kind === 'skies') ?? all.skies[0] ?? null;
+  return { model: published(model) as Model, sky: sky ? (published(sky) as Sky) : null };
 }
 
 export function outputs(): Output[] {
@@ -59,6 +70,7 @@ export function outputs(): Output[] {
       ...all[kind].flatMap((item) => item.files.map((f) => ({ path: latestPath(f.path), file: latestPath(f.path).slice(1), copy: f.path }))),
     ]),
     ...KINDS.map(({ kind }) => ({ path: `/${kind}.json`, file: `${kind}.json`, text: indexJson(kind, all[kind]), type: 'application/json' })),
+    { path: '/docs', file: 'docs/index.html', page: () => page(Docs, 'docs', docsExamples(all)) },
     { path: '/license', file: 'license/index.html', page: () => page(License, 'license', {}) },
     { path: '/404.html', file: '404.html', page: () => page(Missing, 'missing', {}) },
     { path: '/llms.txt', file: 'llms.txt', text: llmsTxt(all), type: 'text/plain; charset=utf-8' },

@@ -42,7 +42,7 @@ export function llmsTxt(all: Record<Kind, Item[]>): string {
 
 - Every file is a plain HTTPS GET: no account and no API key. CORS is open, so browsers can load files straight from ${SITE_URL}.
 - The site has one section per kind of asset, all with the same shape: ${KINDS.map((k) => `/${k.kind}`).join(', ')}. Each item has a page at /<section>/<slug>, a metadata file next to it, and the section has an index at /<section>.json.
-- Versions: a published file never changes. An improved item gets a new version in a new folder (v2, v3, ...) and older versions stay online, so a site that loads v1 keeps getting the same file. \`version\` in the metadata is the latest; \`versions\` lists every version, newest first, with its date, a note on what changed, and its files.
+- Versions: a published file never changes. An improved item gets a new version in a new folder (v2, v3, ...) and older versions stay online, so a site that loads v1 keeps getting the same file. The latest version of every file is also served without the version folder (/models/<slug>/lod0.glb, /skies/<slug>/2k.jpg); it changes when a new version ships, so pin the versioned URL for anything you ship. \`version\` in the metadata is the latest; \`versions\` lists every version, newest first, with its date, a note on what changed, and its files.
 - Slugs are permanent identifiers within a section. Categories may change and are not part of any URL.
 
 ## Models
@@ -91,6 +91,7 @@ scene.environment = sky;
 
 - [Featured](${SITE_URL}/): a selection from every section
 ${KINDS.map((k) => `- [${k.label}](${SITE_URL}/${k.kind}): the catalog, searchable with ?search=<words> and ?category=<category>\n- [${k.kind}.json](${SITE_URL}/${k.kind}.json): every ${k.meta} in one file, sorted by slug`).join('\n')}
+- [Docs](${SITE_URL}/docs): loading in three.js and other engines, and pinned versus latest versions
 - [License](${SITE_URL}/license): what CC0 1.0 allows
 
 ## Model list
@@ -108,6 +109,7 @@ export function sitemapXml(all: Record<Kind, Item[]>): string {
   const urls = [
     `  <url><loc>${SITE_URL}/</loc></url>`,
     ...KINDS.filter((k) => all[k.kind].length).map((k) => `  <url><loc>${SITE_URL}/${k.kind}</loc></url>`),
+    `  <url><loc>${SITE_URL}/docs</loc></url>`,
     `  <url><loc>${SITE_URL}/license</loc></url>`,
     ...items.map((m) => `  <url><loc>${SITE_URL}${itemUrl(m)}</loc>${m.updated ? `<lastmod>${m.updated}</lastmod>` : ''}</url>`),
   ];
