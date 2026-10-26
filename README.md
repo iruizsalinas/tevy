@@ -28,12 +28,13 @@ scene.add(gltf.scene);
 
 ## This repository
 
-The source of the tevy.dev website. Models are not stored in git; `npm run models` downloads the
-published catalog from tevy.dev (sha256-verified) so the site runs locally with every model.
+The source of the tevy.dev website. Assets are not stored in git; `npm run fetch` downloads the
+published catalog of every section from tevy.dev (sha256-verified) so the site runs locally with
+every item.
 
 ```sh
 npm install
-npm run models
+npm run fetch
 npm run dev
 ```
 

@@ -12,7 +12,7 @@
     "build": "node site/build.mjs",
     "preview": "wrangler dev",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "models": "node site/scripts/fetch-models.mjs"
+    "fetch": "node site/scripts/fetch.mjs"
   },
   "devDependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
