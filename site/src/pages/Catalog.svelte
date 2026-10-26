@@ -157,7 +157,7 @@
   {#if shown.length}
     <ul class="grid">
       {#each shown as item, i (`${item.kind}/${item.slug}`)}
-        <li><ItemCard {item} eager={i < 8} label={home && item.kind !== 'models' ? kindInfo(item.kind).singular : ''} /></li>
+        <li><ItemCard {item} eager={i < 8} /></li>
       {/each}
     </ul>
   {:else if home && searching && everything?.length === 0}

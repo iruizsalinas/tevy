@@ -1,7 +1,7 @@
 <script lang="ts">
   import { cardMeta, itemUrl, type Item } from '#lib/catalog';
 
-  let { item, eager = false, label = '' }: { item: Item; eager?: boolean; label?: string } = $props();
+  let { item, eager = false }: { item: Item; eager?: boolean } = $props();
 </script>
 
 <a class="card" class:sky={item.kind === 'skies'} href={itemUrl(item)}>
@@ -14,7 +14,6 @@
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"
     />
-    {#if label}<span class="label mono">{label}</span>{/if}
   </span>
   <span class="body">
     <span class="name">{item.name}</span>
@@ -72,18 +71,6 @@
 
   .sky:hover img {
     transform: scale(1.04);
-  }
-
-  .label {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    padding: 2px 7px;
-    border-radius: 5px;
-    background: rgb(40 24 14 / 0.62);
-    backdrop-filter: blur(8px);
-    font-size: 10.5px;
-    color: rgb(255 244 230 / 0.8);
   }
 
   .body {
