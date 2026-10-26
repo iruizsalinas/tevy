@@ -1,10 +1,10 @@
 <script lang="ts">
   import Layout from './Layout.svelte';
   import { CC0_URL, SITE_URL, formatBytes } from '#lib/models';
-  import { formatLabel, mainFile, resolutionLabel, skyDownloadName, skySnippet, type Sky } from '#lib/skies';
-  import CodeBlock from '#lib/components/CodeBlock.svelte';
+  import { formatLabel, mainFile, resolutionLabel, skyDownloadName, type Sky } from '#lib/skies';
   import Icon from '#lib/components/Icon.svelte';
   import SkyViewer from '#lib/components/SkyViewer.svelte';
+  import UseIt from '#lib/components/UseIt.svelte';
 
   let { sky }: { sky: Sky } = $props();
 
@@ -143,7 +143,7 @@
   </aside>
 
   <div class="snippet">
-    <CodeBlock title="Load in three.js" code={skySnippet(sky, main)} />
+    <UseIt path={main.path} version={sky.version} />
   </div>
 </div>
 

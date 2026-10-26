@@ -95,21 +95,3 @@ export function lod0(model: Model): ModelFile {
 export function lodLabel(file: ModelFile): string {
   return `LOD${file.lod}`;
 }
-
-export function loadSnippet(file: ModelFile): string {
-  return `import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
-import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-
-// renderer and scene: your THREE.WebGLRenderer and THREE.Scene
-const ktx2 = new KTX2Loader()
-  .setTranscoderPath('${TRANSCODER_URL}')
-  .detectSupport(renderer);
-
-const loader = new GLTFLoader()
-  .setKTX2Loader(ktx2)
-  .setMeshoptDecoder(MeshoptDecoder);
-
-const gltf = await loader.loadAsync('${SITE_URL}${file.path}');
-scene.add(gltf.scene);`;
-}

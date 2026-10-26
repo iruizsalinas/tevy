@@ -8,13 +8,12 @@
     formatBytes,
     formatCount,
     formatDimensions,
-    loadSnippet,
     lod0,
     modelUrl,
     type Model,
   } from '#lib/models';
-  import CodeBlock from '#lib/components/CodeBlock.svelte';
   import Icon from '#lib/components/Icon.svelte';
+  import UseIt from '#lib/components/UseIt.svelte';
   import Viewer from '#lib/components/Viewer.svelte';
 
   let { model }: { model: Model } = $props();
@@ -161,7 +160,7 @@
   </aside>
 
   <div class="snippet">
-    <CodeBlock title="Load in three.js" code={loadSnippet(model.files[lod] ?? main)} />
+    <UseIt path={(model.files[lod] ?? main).path} version={model.version} />
   </div>
 </div>
 

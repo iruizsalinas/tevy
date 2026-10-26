@@ -65,15 +65,3 @@ export function skyDownloadName(slug: string, version: number, file: SkyFile): s
   const ext = file.path.split('.').pop();
   return `${slug}-v${version}-${resolutionLabel(file).toLowerCase()}.${ext}`;
 }
-
-export function skySnippet(sky: Sky, file: SkyFile): string {
-  return `import { EquirectangularReflectionMapping } from 'three';
-import { UltraHDRLoader } from 'three/addons/loaders/UltraHDRLoader.js';
-
-// renderer and scene: your THREE.WebGLRenderer and THREE.Scene
-const sky = await new UltraHDRLoader().loadAsync('${SITE_URL}${file.path}');
-sky.mapping = EquirectangularReflectionMapping;
-scene.background = sky;
-scene.environment = sky;
-renderer.toneMappingExposure = ${sky.exposure ?? 1};`;
-}
