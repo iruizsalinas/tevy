@@ -13,6 +13,7 @@
     threeSkySnippet,
   } from '#lib/docs';
   import CodeBlock from '#lib/components/CodeBlock.svelte';
+  import Seo from '#lib/components/Seo.svelte';
 
   // How to use tevy files, once for every item: URLs, versions, and code for three.js and other
   // engines. The examples use a real model and sky so they can be pasted as they are.
@@ -43,14 +44,11 @@
   }
 </script>
 
-<svelte:head>
-  <title>Docs: using tevy assets | tevy</title>
-  <meta
-    name="description"
-    content="How to load tevy models and skies in three.js, React Three Fiber, Babylon.js and model-viewer, and how pinned and latest versions work."
-  />
-  <link rel="canonical" href="{SITE_URL}/docs" />
-</svelte:head>
+<Seo
+  title="How to use tevy models and skies"
+  description="How to load tevy models and skies in three.js, React Three Fiber, Babylon.js and model-viewer, how to build with an AI agent, and when to pin a version or follow the latest."
+  path="/docs"
+/>
 
 <Layout>
   <div class="docs">

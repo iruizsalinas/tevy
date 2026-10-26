@@ -3,6 +3,8 @@
   import { CC0_URL, SITE_URL, formatBytes } from '#lib/models';
   import { formatLabel, mainFile, resolutionLabel, skyDownloadName, type Sky } from '#lib/skies';
   import Icon from '#lib/components/Icon.svelte';
+  import Seo from '#lib/components/Seo.svelte';
+  import { firstSentence } from '#lib/catalog';
   import SkyViewer from '#lib/components/SkyViewer.svelte';
   import UseIt from '#lib/components/UseIt.svelte';
 
@@ -14,7 +16,7 @@
 
   const url = $derived(`${SITE_URL}/skies/${sky.slug}`);
   const description = $derived(
-    `${sky.description} Free CC0 HDR sky panorama for three.js and any engine: ${main.width}x${main.height} ${formatLabel(main.format)}, background and lighting in one file.`,
+    `${firstSentence(sky.description)} Free CC0 HDR sky for three.js and other engines.`,
   );
   const jsonLd = $derived(
     JSON.stringify({
@@ -34,21 +36,15 @@
   );
 </script>
 
+<Seo
+  title="{sky.name}, free CC0 HDR sky"
+  {description}
+  path="/skies/{sky.slug}"
+  json="/skies/{sky.slug}.json"
+  image={{ path: sky.preview, width: 1280, height: 720, alt: `${sky.name}, sky panorama preview` }}
+/>
+
 <svelte:head>
-  <title>{sky.name}: free CC0 HDR sky | tevy</title>
-  <meta name="description" content={description} />
-  <link rel="canonical" href={url} />
-  <link rel="alternate" type="application/json" href="/skies/{sky.slug}.json" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="tevy" />
-  <meta property="og:title" content="{sky.name}: free CC0 HDR sky" />
-  <meta property="og:description" content={description} />
-  <meta property="og:url" content={url} />
-  <meta property="og:image" content="{SITE_URL}{sky.preview}" />
-  <meta property="og:image:width" content="1280" />
-  <meta property="og:image:height" content="720" />
-  <meta property="og:image:alt" content="{sky.name}, sky panorama preview" />
-  <meta name="twitter:card" content="summary_large_image" />
   <link rel="preload" as="image" href={sky.preview} />
   {@html `<script type="application/ld+json">${jsonLd}</script>`}
 </svelte:head>

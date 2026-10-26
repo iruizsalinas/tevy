@@ -2,8 +2,9 @@
   import Layout from './Layout.svelte';
   import { onMount } from 'svelte';
   import { kindInfo, type Item, type Kind } from '#lib/catalog';
-  import { SITE_URL, categoryLabel } from '#lib/models';
+  import { categoryLabel } from '#lib/models';
   import Icon from '#lib/components/Icon.svelte';
+  import Seo from '#lib/components/Seo.svelte';
   import ItemCard from '#lib/components/ItemCard.svelte';
   import Segmented from '#lib/components/Segmented.svelte';
 
@@ -20,13 +21,12 @@
   const home = $derived(!kind);
   const noun = $derived(info ? info.singular : 'item');
   const plural = $derived(info ? info.label.toLowerCase() : 'items');
-  const title = $derived(info ? `All ${plural} | tevy` : 'tevy: free CC0 3D models and skies for the web');
+  const title = $derived(info ? info.title : 'Free 3D models and HDR skies for the web');
   const description = $derived(
     info
       ? `Browse every free CC0 ${noun} on tevy. ${info.blurb}`
-      : 'Free, browser-sized 3D models and HDR skies for three.js and any glTF engine: cars, trees, rocks and road props with LODs, meshopt and KTX2. CC0, free for any use.',
+      : 'Free 3D models and HDR skies made for the browser: cars, trees, rocks, buildings and road props with levels of detail, ready for three.js and any glTF engine. Everything is CC0, free for any use.',
   );
-  const canonical = $derived(info ? `${SITE_URL}/${info.kind}` : `${SITE_URL}/`);
 
   // Newer list from /<kind>.json, if it differs from the one this page was built with.
   let fetched = $state<Item[] | null>(null);
@@ -111,18 +111,7 @@
 
 <svelte:window {onkeydown} />
 
-<svelte:head>
-  <title>{title}</title>
-  <meta name="description" content={description} />
-  <link rel="canonical" href={canonical} />
-  {#if info}<link rel="alternate" type="application/json" href="/{info.kind}.json" />{/if}
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="tevy" />
-  <meta property="og:title" content={title} />
-  <meta property="og:description" content={description} />
-  <meta property="og:url" content={canonical} />
-  <meta property="og:image" content="{SITE_URL}/tevy.png" />
-</svelte:head>
+<Seo {title} {description} path={info ? `/${info.kind}` : '/'} json={info ? `/${info.kind}.json` : undefined} />
 
 <Layout>
 

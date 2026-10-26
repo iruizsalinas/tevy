@@ -1,22 +1,20 @@
 <script lang="ts">
   import Layout from './Layout.svelte';
-  import { CC0_URL, SITE_URL } from '#lib/models';
+  import { CC0_URL } from '#lib/models';
+  import Seo from '#lib/components/Seo.svelte';
 </script>
 
-<svelte:head>
-  <title>License | tevy</title>
-  <meta
-    name="description"
-    content="Every tevy model is CC0 1.0: public domain, free for personal and commercial use, no attribution required. The website code is MIT."
-  />
-  <link rel="canonical" href="{SITE_URL}/license" />
-</svelte:head>
+<Seo
+  title="License"
+  description="Every tevy model and sky is CC0 1.0: public domain and free for personal and commercial use, with no attribution required. The website code is MIT."
+  path="/license"
+/>
 
 <Layout>
   <article class="license">
     <h1 class="display">License</h1>
     <p class="lead">
-      Every model on tevy is released under <a href={CC0_URL} rel="license">CC0 1.0</a>. That puts it in the public domain: you can use it
+      Every model and sky on tevy is released under <a href={CC0_URL} rel="license">CC0 1.0</a>. That puts it in the public domain: you can use it
       for anything, without asking and without giving credit.
     </p>
 
@@ -33,7 +31,7 @@
 
     <section>
       <h2>Credit is optional</h2>
-      <p>If you want to mention where a model came from, something like this is enough:</p>
+      <p>If you want to mention where an asset came from, something like this is enough:</p>
       <p class="credit mono">Model: Norway Spruce from tevy.dev (CC0)</p>
     </section>
 
@@ -45,7 +43,7 @@
           look in your engine.
         </li>
         <li>
-          CC0 waives copyright, not other people's rights. tevy models are original designs and do not depict real brands, logos or
+          CC0 waives copyright, not other people's rights. tevy assets are original designs and do not depict real brands, logos or
           products, but if you add trademarks or likenesses to them, those rights are yours to clear.
         </li>
       </ul>

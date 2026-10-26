@@ -10,6 +10,8 @@ export interface KindInfo {
   /** Plural label, used for navigation and headings. */
   label: string;
   singular: string;
+  /** Page title of the section, before " | tevy". */
+  title: string;
   /** One line on what the section holds. */
   blurb: string;
 }
@@ -19,15 +21,23 @@ export const KINDS: KindInfo[] = [
     kind: 'models',
     label: 'Models',
     singular: 'model',
-    blurb: 'Every model is CC0 glTF with LODs, meshopt geometry and KTX2 textures.',
+    title: 'Free CC0 3D models',
+    blurb: 'Every model is a CC0 glTF file with levels of detail and compressed geometry and textures.',
   },
   {
     kind: 'skies',
     label: 'Skies',
     singular: 'sky',
-    blurb: 'Every sky is a CC0 HDR panorama that works as background and lighting.',
+    title: 'Free CC0 HDR skies',
+    blurb: 'Every sky is a CC0 HDR panorama that lights your scene and serves as its background.',
   },
 ];
+
+/** The first sentence of an item description, for search snippets; the rest is technical detail. */
+export function firstSentence(text: string): string {
+  const end = text.search(/[.!?](\s|$)/);
+  return end === -1 ? text : text.slice(0, end + 1);
+}
 
 export function kindInfo(kind: Kind): KindInfo {
   return KINDS.find((k) => k.kind === kind)!;

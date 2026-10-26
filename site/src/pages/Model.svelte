@@ -6,13 +6,14 @@
     categoryLabel,
     downloadName,
     formatBytes,
-    formatCount,
     formatDimensions,
     lod0,
     modelUrl,
     type Model,
   } from '#lib/models';
   import Icon from '#lib/components/Icon.svelte';
+  import Seo from '#lib/components/Seo.svelte';
+  import { firstSentence } from '#lib/catalog';
   import UseIt from '#lib/components/UseIt.svelte';
   import Viewer from '#lib/components/Viewer.svelte';
 
@@ -24,8 +25,7 @@
 
   const url = $derived(`${SITE_URL}${modelUrl(model)}`);
   const description = $derived(
-    `${model.description} Free CC0 glTF model for three.js and any engine: ${formatCount(main.triangles)} triangles, ` +
-      `${model.files.length} LOD${model.files.length === 1 ? '' : 's'}, meshopt and KTX2 compressed.`,
+    `${firstSentence(model.description)} Free CC0 glTF model for three.js and other engines.`,
   );
   const jsonLd = $derived(
     JSON.stringify({
@@ -51,21 +51,15 @@
   );
 </script>
 
+<Seo
+  title="{model.name}, free CC0 3D model"
+  {description}
+  path="/models/{model.slug}"
+  json="/models/{model.slug}.json"
+  image={{ path: model.preview, width: 1024, height: 1024, alt: `${model.name}, 3D model preview` }}
+/>
+
 <svelte:head>
-  <title>{model.name}: free CC0 3D model (GLB) | tevy</title>
-  <meta name="description" content={description} />
-  <link rel="canonical" href={url} />
-  <link rel="alternate" type="application/json" href="/models/{model.slug}.json" />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="tevy" />
-  <meta property="og:title" content="{model.name}: free CC0 3D model" />
-  <meta property="og:description" content={description} />
-  <meta property="og:url" content={url} />
-  <meta property="og:image" content="{SITE_URL}{model.preview}" />
-  <meta property="og:image:width" content="1024" />
-  <meta property="og:image:height" content="1024" />
-  <meta property="og:image:alt" content="{model.name}, 3D model preview" />
-  <meta name="twitter:card" content="summary_large_image" />
   <link rel="preload" as="image" href={model.preview} />
   {@html `<script type="application/ld+json">${jsonLd}</script>`}
 </svelte:head>
