@@ -4,7 +4,7 @@
     CC0_URL,
     SITE_URL,
     categoryLabel,
-    fileName,
+    downloadName,
     formatBytes,
     formatCount,
     formatDimensions,
@@ -115,12 +115,12 @@
               class="btn small"
               class:primary={file.lod === 0}
               href={file.path}
-              download={fileName(file.path)}
-              aria-label="Download LOD{file.lod}, {fileName(file.path)}"
+              download={downloadName(model.slug, model.version, file)}
+              aria-label="Download LOD{file.lod}, {downloadName(model.slug, model.version, file)}"
             >
               <Icon name="download" size={14} />GLB
             </a>
-            <span class="file first mono">{fileName(file.path)}</span>
+            <span class="file first mono">{file.path}</span>
             {#if file.sha256}<span class="file mono" title="sha256 {file.sha256}">sha256 {file.sha256}</span>{/if}
           </li>
         {/each}
@@ -142,7 +142,7 @@
               <span class="meta"><time class="mono" datetime={v.date}>{v.date}</time> · {v.changes}</span>
               <span class="links mono">
                 {#each v.files as file (file.path)}
-                  <a href={file.path} download={fileName(file.path)} aria-label="Download v{v.version} LOD{file.lod}, {fileName(file.path)}">LOD{file.lod}</a>
+                  <a href={file.path} download={downloadName(model.slug, v.version, file)} aria-label="Download v{v.version} LOD{file.lod}, {downloadName(model.slug, v.version, file)}">LOD{file.lod}</a>
                 {/each}
               </span>
             </li>

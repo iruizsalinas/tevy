@@ -29,7 +29,7 @@ Models are GLB files with meshopt-compressed geometry (EXT_meshopt_compression) 
 
 - Every file is a plain HTTPS GET: no account and no API key. CORS is open, so browsers can load files straight from ${SITE_URL}.
 - Each model has a metadata file at ${SITE_URL}/models/<slug>/model.json listing its files with LOD, byte size, triangle count and sha256.
-- File URLs: ${SITE_URL}/models/<slug>/v<version>/<slug>_lod0.glb is full detail; <slug>_lod1.glb and up have fewer triangles.
+- File URLs: ${SITE_URL}/models/<slug>/v<version>/lod0.glb is full detail; lod1.glb and up have fewer triangles.
 - Versions: a published file never changes. An improved model gets a new version in a new folder (v2, v3, ...) and older versions stay online, so a site that loads v1 keeps getting the same file. \`version\` in model.json is the latest; \`versions\` lists every version, newest first, with its date, a note on what changed, and its files.
 - Slugs are permanent identifiers. Categories may change and are not part of any URL.
 
@@ -44,7 +44,7 @@ const ktx2 = new KTX2Loader()
   .setTranscoderPath('${TRANSCODER_URL}')
   .detectSupport(renderer);
 const loader = new GLTFLoader().setKTX2Loader(ktx2).setMeshoptDecoder(MeshoptDecoder);
-const gltf = await loader.loadAsync('${SITE_URL}/models/<slug>/v1/<slug>_lod0.glb');
+const gltf = await loader.loadAsync('${SITE_URL}/models/<slug>/v1/lod0.glb');
 scene.add(gltf.scene);
 \`\`\`
 

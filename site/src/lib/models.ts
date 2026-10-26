@@ -8,7 +8,7 @@ export const CC0_URL = 'https://creativecommons.org/publicdomain/zero/1.0/';
 
 export interface ModelFile {
   lod: number;
-  /** Site-absolute path, e.g. /models/<slug>/v1/<slug>_lod0.glb */
+  /** Site-absolute path, e.g. /models/<slug>/v1/lod0.glb */
   path: string;
   bytes: number;
   sha256?: string;
@@ -83,8 +83,9 @@ export function modelUrl(model: Pick<Model, 'slug'>): string {
   return `/models/${model.slug}`;
 }
 
-export function fileName(path: string): string {
-  return path.split('/').pop() ?? path;
+/** Name a downloaded file is saved as, unique across models and versions: <slug>-v<n>-lod<n>.glb */
+export function downloadName(slug: string, version: number, file: ModelFile): string {
+  return `${slug}-v${version}-lod${file.lod}.glb`;
 }
 
 export function lod0(model: Model): ModelFile {
