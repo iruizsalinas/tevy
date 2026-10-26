@@ -23,7 +23,7 @@
     <section>
       <h2>What you can do</h2>
       <ul>
-        <li>Use models in games, apps, websites, films, renders and prints, commercial or not.</li>
+        <li>Use the models and skies in games, apps, websites, films, renders and prints, commercial or not.</li>
         <li>Change them: re-texture, cut apart, combine, convert to other formats.</li>
         <li>Redistribute them, in your own projects or as files, and sell work that contains them.</li>
         <li>Load them straight from tevy.dev or host your own copies.</li>

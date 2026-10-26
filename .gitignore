@@ -3,3 +3,4 @@ dist/
 .wrangler/
 build/
 site/public/models/
+site/public/skies/

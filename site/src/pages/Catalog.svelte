@@ -1,30 +1,53 @@
 <script lang="ts">
   import Layout from './Layout.svelte';
   import { onMount } from 'svelte';
-  import { SITE_URL, categoryLabel, type Model } from '#lib/models';
+  import { KINDS, kindInfo, type Item, type Kind } from '#lib/catalog';
+  import { SITE_URL, categoryLabel } from '#lib/models';
   import Icon from '#lib/components/Icon.svelte';
-  import ModelCard from '#lib/components/ModelCard.svelte';
+  import ItemCard from '#lib/components/ItemCard.svelte';
   import Segmented from '#lib/components/Segmented.svelte';
 
-  let { models: built }: { models: Model[] } = $props();
+  // One catalog page for every section (/models, /skies) and for the featured home page (kind null),
+  // where items from all sections are mixed and the filter picks a section instead of a category.
+  let {
+    items: built,
+    kind,
+    sections,
+  }: { items: Item[]; kind: Kind | null; sections: { kind: Kind; count: number }[] } = $props();
 
-  // Newer list from /models.json, if it differs from the one this page was built with.
-  let fetched = $state<Model[] | null>(null);
-  const models = $derived(fetched ?? built);
-  let category = $state('');
+  const info = $derived(kind ? kindInfo(kind) : null);
+  const home = $derived(!kind);
+  const noun = $derived(info ? info.singular : 'item');
+  const plural = $derived(info ? info.label.toLowerCase() : 'items');
+  const title = $derived(info ? `All ${plural} | tevy` : 'tevy: free CC0 3D models and skies for the web');
+  const description = $derived(
+    info
+      ? `Browse every free CC0 ${noun} on tevy. ${info.blurb}`
+      : 'Free, browser-sized 3D models and HDR skies for three.js and any glTF engine: cars, trees, rocks and road props with LODs, meshopt and KTX2. CC0, free for any use.',
+  );
+  const canonical = $derived(info ? `${SITE_URL}/${info.kind}` : `${SITE_URL}/`);
+
+  // Newer list from /<kind>.json, if it differs from the one this page was built with.
+  let fetched = $state<Item[] | null>(null);
+  const items = $derived(fetched ?? built);
+  let filter = $state('');
   let query = $state('');
   let ready = $state(false);
   let search = $state<HTMLInputElement>();
+  // The home page filters by section, a section page by category.
+  const param = $derived(home ? 'section' : 'category');
+  const groupOf = (item: Item) => (home ? item.kind : item.category);
+  const groupLabel = (value: string) => (home ? kindInfo(value as Kind).label : categoryLabel(value));
 
-  const categories = $derived([
+  const choices = $derived([
     { value: '', label: 'All' },
-    ...[...new Set(models.map((m) => m.category))].sort().map((c) => ({ value: c, label: categoryLabel(c) })),
+    ...[...new Set(items.map(groupOf))].sort().map((value) => ({ value, label: groupLabel(value) })),
   ]);
 
   const shown = $derived.by(() => {
     const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-    return models.filter((m) => {
-      if (category && m.category !== category) return false;
+    return items.filter((m) => {
+      if (filter && groupOf(m) !== filter) return false;
       const hay = [m.name, m.slug, m.category, ...(m.tags ?? [])].join(' ').toLowerCase();
       return terms.every((t) => hay.includes(t));
     });
@@ -32,17 +55,20 @@
 
   onMount(() => {
     const params = new URLSearchParams(location.search);
-    category = params.get('category') ?? '';
+    filter = params.get(param) ?? '';
     query = params.get('search') ?? '';
     ready = true;
 
-    // Pick up models published after this page was built.
-    fetch('/models.json', { cache: 'no-cache' })
+    // Pick up items published after this page was built.
+    if (!kind) return;
+    const section = kind;
+    fetch(`/${section}.json`, { cache: 'no-cache' })
       .then((r) => (r.ok ? r.json() : null))
       .then((index) => {
-        if (!index || !Array.isArray(index.models)) return;
-        const key = (list: Model[]) => list.map((m) => `${m.slug}@${m.version}@${m.updated ?? ''}`).join();
-        if (key(index.models) !== key(models)) fetched = index.models;
+        const list = index?.[section];
+        if (!Array.isArray(list)) return;
+        const key = (l: { slug: string; version: number; updated?: string }[]) => l.map((m) => `${m.slug}@${m.version}@${m.updated ?? ''}`).join();
+        if (key(list) !== key(items)) fetched = list.map((m: object) => ({ ...m, kind: section }) as Item);
       })
       .catch(() => {});
   });
@@ -50,7 +76,7 @@
   // Keep the filters in the address bar so filtered views can be shared.
   $effect(() => {
     const params = new URLSearchParams();
-    if (category) params.set('category', category);
+    if (filter) params.set(param, filter);
     if (query.trim()) params.set('search', query.trim());
     if (!ready) return;
     const qs = params.toString();
@@ -58,7 +84,7 @@
   });
 
   function clear() {
-    category = '';
+    filter = '';
     query = '';
   }
 
@@ -74,18 +100,15 @@
 <svelte:window {onkeydown} />
 
 <svelte:head>
-  <title>All models | tevy</title>
-  <meta
-    name="description"
-    content="Browse every free CC0 3D model on tevy: cars, trees, plants, rocks and road props as compact glTF with LODs, meshopt geometry and KTX2 textures."
-  />
-  <link rel="canonical" href="{SITE_URL}/models" />
-  <link rel="alternate" type="application/json" href="/models.json" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  {#if info}<link rel="alternate" type="application/json" href="/{info.kind}.json" />{/if}
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="tevy" />
-  <meta property="og:title" content="All models | tevy" />
-  <meta property="og:description" content="Cars, trees, rocks and props as compact glTF for three.js and any engine. CC0, free for any use." />
-  <meta property="og:url" content="{SITE_URL}/models" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
   <meta property="og:image" content="{SITE_URL}/tevy.png" />
 </svelte:head>
 
@@ -93,33 +116,41 @@
 
 <div class="catalog">
   <header class="intro">
-    <h1 class="display">All models</h1>
-    <p>Every model is CC0 glTF with LODs, meshopt geometry and KTX2 textures.</p>
+    {#if info}
+      <h1 class="display">All {plural}</h1>
+      <p>{info.blurb}</p>
+    {:else}
+      <h1 class="display">Featured</h1>
+      <p>
+        Free, browser-sized assets for three.js and any glTF engine, CC0 for any use. Browse
+        {#each sections as s, i (s.kind)}{#if i}{i === sections.length - 1 ? ' or ' : ', '}{/if}<a href="/{s.kind}">all {s.count} {kindInfo(s.kind).label.toLowerCase()}</a>{/each}.
+      </p>
+    {/if}
   </header>
 
   <div class="toolbar">
-    {#if categories.length > 2}
-      <Segmented bind:value={category} choices={categories} label="Category" />
+    {#if choices.length > 2}
+      <Segmented bind:value={filter} {choices} label={home ? 'Section' : 'Category'} />
     {/if}
     <label class="search">
       <Icon name="search" size={15} />
-      <span class="sr-only">Search models</span>
-      <input bind:this={search} bind:value={query} type="search" placeholder="Search models" autocomplete="off" spellcheck="false" />
+      <span class="sr-only">Search {plural}</span>
+      <input bind:this={search} bind:value={query} type="search" placeholder="Search {plural}" autocomplete="off" spellcheck="false" />
       {#if !query}<kbd aria-hidden="true">/</kbd>{/if}
     </label>
-    <p class="count mono" aria-live="polite">{shown.length} model{shown.length === 1 ? '' : 's'}</p>
+    <p class="count mono" aria-live="polite">{shown.length} {shown.length === 1 ? noun : plural}</p>
   </div>
 
-  <h2 class="sr-only">All models</h2>
+  <h2 class="sr-only">{info ? `All ${plural}` : 'Featured'}</h2>
   {#if shown.length}
     <ul class="grid">
-      {#each shown as model, i (model.slug)}
-        <li><ModelCard {model} eager={i < 8} /></li>
+      {#each shown as item, i (`${item.kind}/${item.slug}`)}
+        <li><ItemCard {item} eager={i < 8} label={home && KINDS.length > 1 && item.kind !== 'models' ? kindInfo(item.kind).singular : ''} /></li>
       {/each}
     </ul>
   {:else}
     <div class="empty">
-      <p>No models match your search.</p>
+      <p>No {plural} match your search.</p>
       <button type="button" class="btn" onclick={clear}>Clear filters</button>
     </div>
   {/if}
@@ -147,6 +178,12 @@
     margin: 8px 0 0;
     color: var(--muted);
     font-size: 15px;
+  }
+
+  .intro a {
+    color: var(--text);
+    text-underline-offset: 3px;
+    text-decoration-color: var(--line-strong);
   }
 
   .toolbar {

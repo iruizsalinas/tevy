@@ -2,13 +2,14 @@
 // Used by site/build.mjs at build time and by the dev server in vite.config.js.
 import type { Component } from 'svelte';
 import { render } from 'svelte/server';
-import { readModels, verifyModelFiles } from '#lib/server/models';
-import { llmsTxt, modelsJson, robotsTxt, sitemapXml } from '#lib/server/files';
-import { modelUrl } from '#lib/models';
+import { KINDS, itemUrl, type Item } from '#lib/catalog';
+import { featured, readAll, verifyFiles } from '#lib/server/catalog';
+import { indexJson, llmsTxt, robotsTxt, sitemapXml } from '#lib/server/files';
 import Catalog from './pages/Catalog.svelte';
 import License from './pages/License.svelte';
 import Missing from './pages/Missing.svelte';
 import Model from './pages/Model.svelte';
+import Sky from './pages/Sky.svelte';
 
 /** A page: rendered Svelte markup plus the client entry (site/src/client/<entry>.ts) that hydrates it. */
 export interface Page {
@@ -36,25 +37,32 @@ function page<P extends Record<string, unknown>>(component: Component<P>, entry:
   return { head, body, entry, props };
 }
 
+function itemPage(item: Item): Page {
+  return item.kind === 'models' ? page(Model, 'model', { model: item }) : page(Sky, 'sky', { sky: item });
+}
+
 export function outputs(): Output[] {
-  const models = readModels();
+  const all = readAll();
+  const sections = KINDS.filter((k) => all[k.kind].length);
   return [
-    { path: '/', file: '', redirect: '/models' },
-    { path: '/models', file: 'models/index.html', page: () => page(Catalog, 'catalog', { models }) },
+    { path: '/', file: 'index.html', page: () => page(Catalog, 'catalog', { items: featured(all), kind: null, sections: sections.map((k) => ({ kind: k.kind, count: all[k.kind].length })) }) },
+    ...sections.flatMap(({ kind }) => [
+      { path: `/${kind}`, file: `${kind}/index.html`, page: () => page(Catalog, 'catalog', { items: all[kind], kind, sections: [] }) },
+      ...all[kind].map((item) => {
+        const path = itemUrl(item);
+        return { path, file: `${path.slice(1)}/index.html`, page: () => itemPage(item) };
+      }),
+    ]),
+    ...KINDS.map(({ kind }) => ({ path: `/${kind}.json`, file: `${kind}.json`, text: indexJson(kind, all[kind]), type: 'application/json' })),
     { path: '/license', file: 'license/index.html', page: () => page(License, 'license', {}) },
-    ...models.map((model) => {
-      const path = modelUrl(model);
-      return { path, file: `${path.slice(1)}/index.html`, page: () => page(Model, 'model', { model }) };
-    }),
     { path: '/404.html', file: '404.html', page: () => page(Missing, 'missing', {}) },
-    { path: '/models.json', file: 'models.json', text: modelsJson(models), type: 'application/json' },
-    { path: '/llms.txt', file: 'llms.txt', text: llmsTxt(models), type: 'text/plain; charset=utf-8' },
-    { path: '/sitemap.xml', file: 'sitemap.xml', text: sitemapXml(models), type: 'application/xml' },
+    { path: '/llms.txt', file: 'llms.txt', text: llmsTxt(all), type: 'text/plain; charset=utf-8' },
+    { path: '/sitemap.xml', file: 'sitemap.xml', text: sitemapXml(all), type: 'application/xml' },
     { path: '/robots.txt', file: 'robots.txt', text: robotsTxt(), type: 'text/plain; charset=utf-8' },
   ];
 }
 
 /** Build-time check that every published version's files are present and unchanged. */
 export function verify(): void {
-  verifyModelFiles(readModels());
+  verifyFiles(Object.values(readAll()).flat());
 }

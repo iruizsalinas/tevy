@@ -7,6 +7,7 @@ const entries = {
   catalog: 'site/src/client/catalog.ts',
   license: 'site/src/client/license.ts',
   model: 'site/src/client/model.ts',
+  sky: 'site/src/client/sky.ts',
   missing: 'site/src/client/missing.ts',
 };
 

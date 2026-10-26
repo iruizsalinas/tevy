@@ -4,10 +4,11 @@
 
 <footer>
   <p>
-    Models <a href={CC0_URL} rel="license">CC0 1.0</a>, site code MIT. <a href="/license">License</a>
+    Assets <a href={CC0_URL} rel="license">CC0 1.0</a>, site code MIT. <a href="/license">License</a>
   </p>
   <p class="links mono">
     <a href="/models.json">models.json</a>
+    <a href="/skies.json">skies.json</a>
     <a href="/llms.txt">llms.txt</a>
     <a href="/sitemap.xml">sitemap.xml</a>
   </p>

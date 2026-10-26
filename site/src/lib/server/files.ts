@@ -1,9 +1,12 @@
-// The generated text files: /models.json, /llms.txt (llmstxt.org format), /sitemap.xml, /robots.txt.
-import { SITE_URL, TRANSCODER_URL, categoryLabel, formatBytes, formatDimensions, lod0, modelUrl, type Model } from '#lib/models';
-import { generatedAt } from '#lib/server/models';
+// The generated text files: /<kind>.json, /llms.txt (llmstxt.org format), /sitemap.xml, /robots.txt.
+import { KINDS, itemUrl, type Item, type Kind } from '#lib/catalog';
+import { SITE_URL, TRANSCODER_URL, categoryLabel, formatBytes, formatDimensions, lod0, type Model } from '#lib/models';
+import { formatLabel, mainFile, type Sky } from '#lib/skies';
+import { generatedAt, published } from '#lib/server/catalog';
 
-export function modelsJson(models: Model[]): string {
-  return JSON.stringify({ schema: 2, site: SITE_URL, generated: generatedAt(models), count: models.length, models });
+/** /models.json, /skies.json: every item's metadata file in one, sorted by slug. */
+export function indexJson(kind: Kind, items: Item[]): string {
+  return JSON.stringify({ schema: 2, site: SITE_URL, generated: generatedAt(items), count: items.length, [kind]: items.map(published) });
 }
 
 function modelLine(m: Model): string {
@@ -18,22 +21,39 @@ function modelLine(m: Model): string {
   return `- [${m.name}](${SITE_URL}/models/${m.slug}/model.json): ${facts.join(', ')}. ${m.description}`;
 }
 
-export function llmsTxt(models: Model[]): string {
-  const text = `# tevy
+function skyLine(s: Sky): string {
+  const f = mainFile(s);
+  const facts = [
+    `${f.width}x${f.height} ${formatLabel(f.format)}, ${formatBytes(f.bytes)}`,
+    s.sun ? `sun elevation ${s.sun.elevation}°` : '',
+    `version ${s.version}`,
+  ].filter(Boolean);
+  return `- [${s.name}](${SITE_URL}/skies/${s.slug}/sky.json): ${facts.join(', ')}. ${s.description}`;
+}
 
-> Free, browser-sized 3D models (cars, trees, rocks, props) as compact glTF binary files for three.js and any glTF engine. Every model is CC0 1.0: public domain, free for commercial use, no attribution required.
+export function llmsTxt(all: Record<Kind, Item[]>): string {
+  const models = all.models as Model[];
+  const skies = all.skies as Sky[];
+  return `# tevy
 
-Models are GLB files with meshopt-compressed geometry (EXT_meshopt_compression) and KTX2 textures (KHR_texture_basisu), each with several levels of detail.
+> Free, browser-sized assets for three.js and any glTF engine: 3D models (cars, trees, plants, rocks, road props) and HDR sky panoramas. Everything is CC0 1.0: public domain, free for commercial use, no attribution required.
 
 ## Download
 
 - Every file is a plain HTTPS GET: no account and no API key. CORS is open, so browsers can load files straight from ${SITE_URL}.
-- Each model has a metadata file at ${SITE_URL}/models/<slug>/model.json listing its files with LOD, byte size, triangle count and sha256.
-- File URLs: ${SITE_URL}/models/<slug>/v<version>/lod0.glb is full detail; lod1.glb and up have fewer triangles.
-- Versions: a published file never changes. An improved model gets a new version in a new folder (v2, v3, ...) and older versions stay online, so a site that loads v1 keeps getting the same file. \`version\` in model.json is the latest; \`versions\` lists every version, newest first, with its date, a note on what changed, and its files.
-- Slugs are permanent identifiers. Categories may change and are not part of any URL.
+- The site has one section per kind of asset, all with the same shape: ${KINDS.map((k) => `/${k.kind}`).join(', ')}. Each item has a page at /<section>/<slug>, a metadata file next to it, and the section has an index at /<section>.json.
+- Versions: a published file never changes. An improved item gets a new version in a new folder (v2, v3, ...) and older versions stay online, so a site that loads v1 keeps getting the same file. \`version\` in the metadata is the latest; \`versions\` lists every version, newest first, with its date, a note on what changed, and its files.
+- Slugs are permanent identifiers within a section. Categories may change and are not part of any URL.
 
-## Load in three.js
+## Models
+
+GLB files with meshopt-compressed geometry (EXT_meshopt_compression) and KTX2 textures (KHR_texture_basisu), each with several levels of detail.
+
+- Metadata: ${SITE_URL}/models/<slug>/model.json lists the files with LOD, byte size, triangle count and sha256.
+- Files: ${SITE_URL}/models/<slug>/v<version>/lod0.glb is full detail; lod1.glb and up have fewer triangles.
+- Units are meters, +Y is up, and the front of a model faces +Z. \`dimensions\` is the bounding box size in meters.
+- \`parts\` lists named nodes. Moving pieces (wheels, doors, steering wheels) are separate nodes with their origin at the pivot and stable names such as wheel_FL, wheel_FR, wheel_RL and wheel_RR.
+- Materials are glTF PBR; car paint uses clearcoat and glass uses transmission.
 
 \`\`\`js
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -50,35 +70,46 @@ scene.add(gltf.scene);
 
 Other engines need the same two glTF extensions: meshopt decoding and KTX2 (Basis Universal) transcoding.
 
-## Conventions
+## Skies
 
-- Units are meters, +Y is up, and the front of a model faces +Z.
-- \`dimensions\` in model.json is the bounding box size in meters (x, y, z).
-- \`parts\` in model.json lists named nodes. Moving pieces (wheels, doors, steering wheels) are separate nodes with their origin at the pivot and stable names such as wheel_FL, wheel_FR, wheel_RL and wheel_RR.
-- Materials are glTF PBR; car paint uses clearcoat and glass uses transmission.
+Equirectangular HDR panoramas, +Y up, usable as scene background and as image-based lighting. The sun is part of the image.
+
+- Metadata: ${SITE_URL}/skies/<slug>/sky.json lists the files (role \`environment\`: full size for background and lighting; \`lighting\`: smaller, for lighting only), the sun direction and a suggested tone mapping exposure.
+- Files are Ultra HDR JPEGs (an 8-bit JPEG with an HDR gain map): ${SITE_URL}/skies/<slug>/v<version>/2k.jpg and 1k.jpg.
+
+\`\`\`js
+import { EquirectangularReflectionMapping } from 'three';
+import { UltraHDRLoader } from 'three/addons/loaders/UltraHDRLoader.js';
+
+const sky = await new UltraHDRLoader().loadAsync('${SITE_URL}/skies/<slug>/v1/2k.jpg');
+sky.mapping = EquirectangularReflectionMapping;
+scene.background = sky;
+scene.environment = sky;
+\`\`\`
 
 ## Index
 
-- [models.json](${SITE_URL}/models.json): every model.json in one file, sorted by slug
-- [model.json](${SITE_URL}/models/<slug>/model.json): metadata of one model
-- [Catalog](${SITE_URL}/models): the website, searchable with ?search=<words> and ?category=<category>, with an interactive 3D viewer per model
+- [Featured](${SITE_URL}/): a selection from every section
+${KINDS.map((k) => `- [${k.label}](${SITE_URL}/${k.kind}): the catalog, searchable with ?search=<words> and ?category=<category>\n- [${k.kind}.json](${SITE_URL}/${k.kind}.json): every ${k.meta} in one file, sorted by slug`).join('\n')}
 - [License](${SITE_URL}/license): what CC0 1.0 allows
 
-## Models
+## Model list
 
 ${models.map(modelLine).join('\n')}
+
+## Sky list
+
+${skies.length ? skies.map(skyLine).join('\n') : 'No skies are published yet.'}
 `;
-  return text;
 }
 
-export function sitemapXml(models: Model[]): string {
+export function sitemapXml(all: Record<Kind, Item[]>): string {
+  const items = KINDS.flatMap((k) => all[k.kind]);
   const urls = [
     `  <url><loc>${SITE_URL}/</loc></url>`,
-    `  <url><loc>${SITE_URL}/models</loc></url>`,
+    ...KINDS.filter((k) => all[k.kind].length).map((k) => `  <url><loc>${SITE_URL}/${k.kind}</loc></url>`),
     `  <url><loc>${SITE_URL}/license</loc></url>`,
-    ...models.map(
-      (m) => `  <url><loc>${SITE_URL}${modelUrl(m)}</loc>${m.updated ? `<lastmod>${m.updated}</lastmod>` : ''}</url>`,
-    ),
+    ...items.map((m) => `  <url><loc>${SITE_URL}${itemUrl(m)}</loc>${m.updated ? `<lastmod>${m.updated}</lastmod>` : ''}</url>`),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;
 }
