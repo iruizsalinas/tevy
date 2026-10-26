@@ -131,7 +131,7 @@ export class Viewer {
     controls.addEventListener('change', () => (this.dirty = true));
     this.controls = controls;
 
-    const ktx2 = new KTX2Loader().setTranscoderPath('/basis/').detectSupport(renderer);
+    const ktx2 = new KTX2Loader().detectSupport(renderer);
     this.loader = new GLTFLoader().setKTX2Loader(ktx2).setMeshoptDecoder(MeshoptDecoder);
     this.ktx2 = ktx2;
     this.maxAnisotropy = Math.min(renderer.capabilities.getMaxAnisotropy(), 8);
