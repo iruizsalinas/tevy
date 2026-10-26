@@ -31,6 +31,15 @@
     ['other', 'Other engines'],
     ['metadata', 'Metadata and indexes'],
   ];
+
+  // Scrolls to a section without putting a #fragment in the address bar.
+  function jump(id: string) {
+    const target = document.getElementById(id);
+    if (!target) return;
+    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    target.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    target.querySelector('h2')?.focus({ preventScroll: true });
+  }
 </script>
 
 <svelte:head>
@@ -48,7 +57,7 @@
       <p class="toc-title">On this page</p>
       <ul>
         {#each toc as [id, label] (id)}
-          <li><a href="#{id}">{label}</a></li>
+          <li><button type="button" onclick={() => jump(id)}>{label}</button></li>
         {/each}
       </ul>
     </nav>
@@ -61,7 +70,7 @@
       </p>
 
       <section id="urls">
-        <h2>Files and URLs</h2>
+        <h2 tabindex="-1">Files and URLs</h2>
         <p>Every section (models, skies) has the same shape:</p>
         <table class="paths">
           <tbody>
@@ -80,7 +89,7 @@
       </section>
 
       <section id="versions">
-        <h2>Versions: pinned or latest</h2>
+        <h2 tabindex="-1">Versions: pinned or latest</h2>
         <p>
           When an item improves, for example a better tree crown, it gets a new version in a new folder (v2, v3, ...). Older versions stay online
           for good. Each file has two URLs, and you choose which one to use:
@@ -112,7 +121,7 @@
       </section>
 
       <section id="three-models">
-        <h2>three.js: models</h2>
+        <h2 tabindex="-1">three.js: models</h2>
         <p>
           Models are glTF binary files with meshopt-compressed geometry and KTX2 textures, so GLTFLoader needs a decoder for each. Set the loader
           up once and reuse it for every model.
@@ -131,7 +140,7 @@
 
       {#if sky}
         <section id="three-skies">
-          <h2>three.js: skies</h2>
+          <h2 tabindex="-1">three.js: skies</h2>
           <p>
             Skies are Ultra HDR JPEGs: a normal JPEG with an HDR gain map, a fraction of the size of an .hdr file. One file is both the
             background and the lighting. The sun is in the image, so reflections and soft light come for free; for sharp shadows add a light
@@ -146,7 +155,7 @@
       {/if}
 
       <section id="other">
-        <h2>Other engines</h2>
+        <h2 tabindex="-1">Other engines</h2>
         <p>
           Any engine that reads glTF with the <span class="mono">EXT_meshopt_compression</span> and
           <span class="mono">KHR_texture_basisu</span> extensions can load the models.
@@ -161,7 +170,7 @@
       </section>
 
       <section id="metadata">
-        <h2>Metadata and indexes</h2>
+        <h2 tabindex="-1">Metadata and indexes</h2>
         <ul>
           <li>
             <a class="mono" href="/models/{model.slug}/model.json">model.json</a> and <span class="mono">sky.json</span> describe the latest version.
@@ -214,15 +223,19 @@
     margin-top: 2px;
   }
 
-  .toc a {
+  .toc button {
     display: block;
     padding: 4px 0;
+    border: 0;
+    background: none;
+    font: inherit;
     font-size: 13.5px;
+    text-align: left;
     color: var(--muted);
-    text-decoration: none;
+    cursor: pointer;
   }
 
-  .toc a:hover {
+  .toc button:hover {
     color: var(--text);
   }
 
