@@ -78,6 +78,7 @@
             <tr><td class="mono">/models/&lt;slug&gt;.json</td><td>Metadata: files, sizes, sha256, versions.</td></tr>
             <tr><td class="mono">/models/&lt;slug&gt;/v1/lod0.glb</td><td>A file of version 1. It never changes.</td></tr>
             <tr><td class="mono">/models/&lt;slug&gt;/lod0.glb</td><td>The same file of the latest version.</td></tr>
+            <tr><td class="mono">/models/&lt;slug&gt;/v1/preview.webp</td><td>The preview image of version 1.</td></tr>
             <tr><td class="mono">/models.json</td><td>Every model's metadata in one file.</td></tr>
           </tbody>
         </table>
@@ -174,7 +175,7 @@
         <ul>
           <li>
             An item's metadata, such as <a class="mono" href="/models/{model.slug}.json">/models/{model.slug}.json</a>, describes the latest version.
-            <span class="mono">versions</span> lists every version, newest first, with its date, what changed and its files.
+            <span class="mono">versions</span> lists every version, newest first, with its date, what changed, its preview and its files.
           </li>
           <li>
             Every file has its byte size and sha256, so you can check a download or cache files by hash.

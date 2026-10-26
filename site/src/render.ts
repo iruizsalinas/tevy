@@ -67,7 +67,9 @@ export function outputs(): Output[] {
         return { path, file: `${path.slice(1)}/index.html`, page: () => itemPage(item) };
       }),
       // The latest version's files at unversioned URLs, for sites that follow new versions.
-      ...all[kind].flatMap((item) => item.files.map((f) => ({ path: latestPath(f.path), file: latestPath(f.path).slice(1), copy: f.path }))),
+      ...all[kind].flatMap((item) =>
+        [...item.files.map((f) => f.path), item.preview].map((path) => ({ path: latestPath(path), file: latestPath(path).slice(1), copy: path })),
+      ),
     ]),
     ...KINDS.map(({ kind }) => ({ path: `/${kind}.json`, file: `${kind}.json`, text: indexJson(kind, all[kind]), type: 'application/json' })),
     { path: '/docs', file: 'docs/index.html', page: () => page(Docs, 'docs', docsExamples(all)) },

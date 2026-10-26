@@ -20,10 +20,11 @@ export interface ModelVersion {
   version: number;
   date: string;
   changes: string;
+  preview: string;
   files: ModelFile[];
 }
 
-/** The content of /models/<slug>.json (schema 2). */
+/** The content of /models/<slug>.json (schema 1). */
 export interface Model {
   schema: number;
   slug: string;

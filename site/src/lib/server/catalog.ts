@@ -47,6 +47,7 @@ export function featured(all: Record<Kind, Item[]>): Item[] {
 export function verifyFiles(items: Item[]): void {
   for (const item of items) {
     for (const v of item.versions) {
+      if (!existsSync(join(PUBLIC_DIR, v.preview))) throw new Error(`${item.kind}/${item.slug} v${v.version}: missing ${v.preview}`);
       for (const f of v.files) {
         const local = join(PUBLIC_DIR, f.path);
         if (!existsSync(local)) throw new Error(`${item.kind}/${item.slug} v${v.version}: missing ${f.path}`);

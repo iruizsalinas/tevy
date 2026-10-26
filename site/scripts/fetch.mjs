@@ -43,7 +43,7 @@ for (const kind of SECTIONS) {
       save(file.path, data);
       downloaded++;
     }
-    save(item.preview, await get(item.preview));
+    for (const v of item.versions) save(v.preview, await get(v.preview));
     save(`/${kind}/${item.slug}.json`, JSON.stringify(item, null, 2) + '\n');
     console.log(`${kind}/${item.slug} v${item.version}`);
   }

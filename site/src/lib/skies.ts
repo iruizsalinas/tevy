@@ -18,10 +18,11 @@ export interface SkyVersion {
   version: number;
   date: string;
   changes: string;
+  preview: string;
   files: SkyFile[];
 }
 
-/** The content of /skies/<slug>.json (schema 2). */
+/** The content of /skies/<slug>.json (schema 1). */
 export interface Sky {
   schema: number;
   slug: string;
