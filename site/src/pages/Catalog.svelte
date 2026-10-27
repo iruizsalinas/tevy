@@ -315,6 +315,20 @@
       margin-left: auto;
     }
 
+    /* Four tabs with counts must fit a 320px phone; scroll rather than widen the page. */
+    .tabs {
+      max-width: 100%;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tabs a {
+      flex: none;
+      gap: 5px;
+      padding: 0 8px;
+      font-size: 13px;
+    }
+
     .grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
