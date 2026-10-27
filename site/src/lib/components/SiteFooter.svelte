@@ -9,9 +9,7 @@
     <a href="/skies.json">skies.json</a>
     <a href="/materials.json">materials.json</a>
     <a href="/llms.txt">llms.txt</a>
-    <a href="/sitemap.xml">sitemap.xml</a>
-    <a href="https://github.com/iruizsalinas/tevy">GitHub</a>
-  </p>
+    <a href="/sitemap.xml">sitemap.xml</a>  </p>
 </footer>
 
 <style>
