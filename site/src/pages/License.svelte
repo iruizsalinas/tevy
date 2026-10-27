@@ -6,7 +6,7 @@
 
 <Seo
   title="License"
-  description="Every tevy model and sky is CC0 1.0: public domain and free for personal and commercial use, with no attribution required. The website code is MIT."
+  description="Every tevy model, sky and material is CC0 1.0: public domain and free for personal and commercial use, with no attribution required."
   path="/license"
 />
 
@@ -14,7 +14,7 @@
   <article class="license">
     <h1 class="display">License</h1>
     <p class="lead">
-      Every model and sky on tevy is released under <a href={CC0_URL} rel="license">CC0 1.0</a>. That puts it in the public domain: you can use it
+      Every model, sky and material on tevy is released under <a href={CC0_URL} rel="license">CC0 1.0</a>. That puts it in the public domain: you can use it
       for anything, without asking and without giving credit.
     </p>
 
@@ -47,11 +47,6 @@
           products, but if you add trademarks or likenesses to them, those rights are yours to clear.
         </li>
       </ul>
-    </section>
-
-    <section>
-      <h2>Website code</h2>
-      <p>The source code of this website is released under the MIT license. The full CC0 legal text is at <a href={CC0_URL} rel="license">creativecommons.org</a>.</p>
     </section>
   </article>
 </Layout>
