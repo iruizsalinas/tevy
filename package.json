@@ -11,6 +11,7 @@
     "dev": "vite",
     "build": "node site/build.mjs",
     "preview": "wrangler dev",
+    "deploy": "npm run build && wrangler deploy",
     "check": "svelte-check --tsconfig ./tsconfig.json",
     "fetch": "node site/scripts/fetch.mjs"
   },
