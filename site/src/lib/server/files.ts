@@ -136,7 +136,7 @@ const material = new MeshStandardMaterial({ map: color, normalMap: normal, aoMap
 ## Index
 
 - [Featured](${SITE_URL}/): a selection from every section
-${KINDS.map((k) => `- [${k.label}](${SITE_URL}/${k.kind}): the catalog, searchable with ?search=<words> and ?category=<category>\n- [${k.kind}.json](${SITE_URL}/${k.kind}.json): the latest version of every ${k.singular} in one file, sorted by slug; version history in each item's own .json`).join('\n')}
+${KINDS.map((k) => `- [${k.label}](${SITE_URL}/${k.kind}): the catalog, searchable with ?search=<words> (names, categories and tags)\n- [${k.kind}.json](${SITE_URL}/${k.kind}.json): the latest version of every ${k.singular} in one file, sorted by slug; version history in each item's own .json`).join('\n')}
 - [Docs](${SITE_URL}/docs): loading in three.js and other engines, and pinned versus latest versions
 - [License](${SITE_URL}/license): what CC0 1.0 allows
 

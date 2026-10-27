@@ -2,14 +2,12 @@
   import Layout from './Layout.svelte';
   import { onMount } from 'svelte';
   import { kindInfo, type Card, type Kind } from '#lib/catalog';
-  import { categoryLabel } from '#lib/models';
   import Icon from '#lib/components/Icon.svelte';
   import Seo from '#lib/components/Seo.svelte';
   import ItemCard from '#lib/components/ItemCard.svelte';
-  import Segmented from '#lib/components/Segmented.svelte';
 
   // One catalog page for the featured home page (kind null) and every section (/models, /skies, /materials).
-  // The tabs link between them; a section page also filters by category. Searching on the home
+  // The tabs link between them. Search matches names, categories and tags; searching on the home
   // page searches every section, given as `everything`.
   let {
     items: built,
@@ -29,22 +27,15 @@
       : 'Free 3D models, HDR skies and PBR materials made for the browser: cars, trees, buildings and road props with levels of detail, plus seamless ground textures. Everything is CC0, ready for three.js and any glTF engine.',
   );
 
-  let category = $state('');
   let query = $state('');
   let ready = $state(false);
   let search = $state<HTMLInputElement>();
   const searching = $derived(query.trim().length > 0);
   const items = $derived(home && searching ? everything : built);
 
-  const categories = $derived([
-    { value: '', label: 'All' },
-    ...[...new Set(items.map((m) => m.category))].sort().map((value) => ({ value, label: categoryLabel(value) })),
-  ]);
-
   const shown = $derived.by(() => {
     const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
     return items.filter((m) => {
-      if (category && m.category !== category) return false;
       const hay = [m.name, m.slug, m.category, ...(m.tags ?? [])].join(' ').toLowerCase();
       return terms.every((t) => hay.includes(t));
     });
@@ -52,15 +43,13 @@
 
   onMount(() => {
     const params = new URLSearchParams(location.search);
-    if (kind) category = params.get('category') ?? '';
     query = params.get('search') ?? '';
     ready = true;
   });
 
-  // Keep the filters in the address bar so filtered views can be shared.
+  // Keep the search in the address bar so searches can be shared.
   $effect(() => {
     const params = new URLSearchParams();
-    if (category) params.set('category', category);
     if (query.trim()) params.set('search', query.trim());
     if (!ready) return;
     const qs = params.toString();
@@ -68,7 +57,6 @@
   });
 
   function clear() {
-    category = '';
     query = '';
   }
 
@@ -109,9 +97,6 @@
     <p class="count mono" aria-live="polite">
       {#if !home || searching}{shown.length} {shown.length === 1 ? noun : plural}{/if}
     </p>
-    {#if !home && categories.length > 2}
-      <div class="categories"><Segmented bind:value={category} choices={categories} label="Category" /></div>
-    {/if}
   </div>
 
   <h2 class="sr-only">{info ? `All ${plural}` : searching ? 'Search results' : 'Featured'}</h2>
@@ -124,7 +109,7 @@
   {:else}
     <div class="empty">
       <p>Nothing matches your search.</p>
-      <button type="button" class="btn" onclick={clear}>Clear filters</button>
+      <button type="button" class="btn" onclick={clear}>Clear search</button>
     </div>
   {/if}
 </div>
@@ -205,10 +190,6 @@
     font-size: 11px;
     font-weight: 400;
     color: var(--faint);
-  }
-
-  .categories {
-    flex: 1 1 100%;
   }
 
   .search {
