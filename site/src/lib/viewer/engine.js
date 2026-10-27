@@ -66,6 +66,15 @@ function makeContactTexture() {
   return tex;
 }
 
+// Very short loops, such as a bat's wingbeat, are a blur at real speed; the preview stretches each
+// loop to at least this long. The files keep the real timing.
+const MIN_LOOP_SECONDS = 0.6;
+
+/** How long one loop of a clip lasts in the preview. */
+function loopSeconds(clip) {
+  return Math.max(clip.duration, MIN_LOOP_SECONDS);
+}
+
 export class Viewer {
   constructor(container, { onStatus } = {}) {
     this.container = container;
@@ -363,7 +372,7 @@ export class Viewer {
   playNext(name) {
     const names = this.clipNames().filter((n) => n !== this.action?.getClip().name);
     const next = name ?? names[Math.floor(Math.random() * names.length)];
-    const { duration } = this.clips.get(next);
+    const duration = loopSeconds(this.clips.get(next));
     // Whole loops, about four seconds in all.
     this.shuffleLeft = Math.max(1, Math.round(4 / duration)) * duration;
     this.play(next);
@@ -378,7 +387,7 @@ export class Viewer {
     const prev = this.action;
     this.setPartner(clip && name in PAIRS ? this.makePartner(clip, PAIRS[name]) : null);
     if (next) {
-      next.reset().play();
+      next.reset().setEffectiveTimeScale(clip.duration / loopSeconds(clip)).play();
       if (prev) next.crossFadeFrom(prev, 0.35, false);
     } else {
       this.mixer.stopAllAction();
