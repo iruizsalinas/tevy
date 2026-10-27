@@ -10,7 +10,7 @@ export const FEATURED: string[] = [
   'models/norway-spruce',
   'models/padel-court',
   'skies/golden-hour',
-  'models/hiker',
+  'models/santa',
   'models/cemetery-gate',
   'models/boathouse',
   'models/scarecrow',
