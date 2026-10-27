@@ -2,7 +2,7 @@
 // Used by site/build.mjs at build time and by the dev server in vite.config.js.
 import type { Component } from 'svelte';
 import { render } from 'svelte/server';
-import { KINDS, itemUrl, latestPath, type Item, type Kind } from '#lib/catalog';
+import { KINDS, itemUrl, latestPath, toCard, type Item, type Kind } from '#lib/catalog';
 import type { Model } from '#lib/models';
 import type { Sky } from '#lib/skies';
 import type { Material } from '#lib/materials';
@@ -76,9 +76,14 @@ export function outputs(): Output[] {
   const sections = KINDS.filter((k) => all[k.kind].length);
   const counts = sections.map((k) => ({ kind: k.kind, count: all[k.kind].length }));
   return [
-    { path: '/', file: 'index.html', page: () => page(Catalog, 'catalog', { items: featured(all), kind: null, sections: counts }) },
+    {
+      path: '/',
+      file: 'index.html',
+      page: () =>
+        page(Catalog, 'catalog', { items: featured(all).map(toCard), everything: sections.flatMap((k) => all[k.kind].map(toCard)), kind: null, sections: counts }),
+    },
     ...sections.flatMap(({ kind }) => [
-      { path: `/${kind}`, file: `${kind}/index.html`, page: () => page(Catalog, 'catalog', { items: all[kind], kind, sections: counts }) },
+      { path: `/${kind}`, file: `${kind}/index.html`, page: () => page(Catalog, 'catalog', { items: all[kind].map(toCard), kind, sections: counts }) },
       ...all[kind].map((item) => {
         const path = itemUrl(item);
         return { path, file: `${path.slice(1)}/index.html`, page: () => itemPage(item, all) };

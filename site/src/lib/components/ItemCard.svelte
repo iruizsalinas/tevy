@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { cardMeta, itemUrl, type Item } from '#lib/catalog';
+  import { itemUrl, type Card } from '#lib/catalog';
 
-  let { item, eager = false }: { item: Item; eager?: boolean } = $props();
+  let { item, eager = false }: { item: Card; eager?: boolean } = $props();
 
   const KIND_ALT = { models: '3D model', skies: 'sky panorama', materials: 'material' };
 </script>
@@ -19,7 +19,7 @@
   </span>
   <span class="body">
     <span class="name">{item.name}</span>
-    <span class="meta mono">{cardMeta(item)}</span>
+    <span class="meta mono">{item.meta}</span>
   </span>
 </a>
 

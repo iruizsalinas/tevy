@@ -1,7 +1,7 @@
 <script lang="ts">
   import Layout from './Layout.svelte';
   import { onMount } from 'svelte';
-  import { kindInfo, type Item, type Kind } from '#lib/catalog';
+  import { kindInfo, type Card, type Kind } from '#lib/catalog';
   import { categoryLabel } from '#lib/models';
   import Icon from '#lib/components/Icon.svelte';
   import Seo from '#lib/components/Seo.svelte';
@@ -10,12 +10,13 @@
 
   // One catalog page for the featured home page (kind null) and every section (/models, /skies, /materials).
   // The tabs link between them; a section page also filters by category. Searching on the home
-  // page searches every section.
+  // page searches every section, given as `everything`.
   let {
     items: built,
+    everything = [],
     kind,
     sections,
-  }: { items: Item[]; kind: Kind | null; sections: { kind: Kind; count: number }[] } = $props();
+  }: { items: Card[]; everything?: Card[]; kind: Kind | null; sections: { kind: Kind; count: number }[] } = $props();
 
   const info = $derived(kind ? kindInfo(kind) : null);
   const home = $derived(!kind);
@@ -28,16 +29,12 @@
       : 'Free 3D models, HDR skies and PBR materials made for the browser: cars, trees, buildings and road props with levels of detail, plus seamless ground textures. Everything is CC0, ready for three.js and any glTF engine.',
   );
 
-  // Newer list from /<kind>.json, if it differs from the one this page was built with.
-  let fetched = $state<Item[] | null>(null);
-  // Every item of every section, loaded on the home page once a search starts.
-  let everything = $state<Item[] | null>(null);
   let category = $state('');
   let query = $state('');
   let ready = $state(false);
   let search = $state<HTMLInputElement>();
   const searching = $derived(query.trim().length > 0);
-  const items = $derived(home && searching && everything ? everything : (fetched ?? built));
+  const items = $derived(home && searching ? everything : built);
 
   const categories = $derived([
     { value: '', label: 'All' },
@@ -53,36 +50,11 @@
     });
   });
 
-  async function loadSection(section: Kind): Promise<Item[] | null> {
-    try {
-      const r = await fetch(`/${section}.json`, { cache: 'no-cache' });
-      const list = r.ok ? (await r.json())?.[section] : null;
-      return Array.isArray(list) ? list.map((m: object) => ({ ...m, kind: section }) as Item) : null;
-    } catch {
-      return null;
-    }
-  }
-
   onMount(() => {
     const params = new URLSearchParams(location.search);
     if (kind) category = params.get('category') ?? '';
     query = params.get('search') ?? '';
     ready = true;
-
-    // Pick up items published after this page was built.
-    if (!kind) return;
-    loadSection(kind).then((list) => {
-      const key = (l: Item[]) => l.map((m) => `${m.slug}@${m.version}@${m.updated ?? ''}`).join();
-      if (list && key(list) !== key(items)) fetched = list;
-    });
-  });
-
-  $effect(() => {
-    if (!home || !searching || everything) return;
-    everything = [];
-    Promise.all(sections.map((s) => loadSection(s.kind))).then((lists) => {
-      everything = lists.flatMap((l) => l ?? []);
-    });
   });
 
   // Keep the filters in the address bar so filtered views can be shared.
@@ -149,8 +121,6 @@
         <li><ItemCard {item} eager={i < 8} /></li>
       {/each}
     </ul>
-  {:else if home && searching && everything?.length === 0}
-    <div class="empty"><p>Searching…</p></div>
   {:else}
     <div class="empty">
       <p>Nothing matches your search.</p>

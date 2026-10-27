@@ -68,6 +68,25 @@ export function latestPath(path: string): string {
 }
 
 /** The short facts on a catalog card. */
+/**
+ * What a catalog card and the catalog filters need. Catalog pages embed only this, so their size
+ * does not grow with file lists and version history; the full record is on the item's own page.
+ */
+export interface Card {
+  kind: Kind;
+  slug: string;
+  name: string;
+  category: string;
+  tags: string[];
+  preview: string;
+  meta: string;
+}
+
+export function toCard(item: Item): Card {
+  const { kind, slug, name, category, preview } = item;
+  return { kind, slug, name, category, tags: item.tags ?? [], preview, meta: cardMeta(item) };
+}
+
 export function cardMeta(item: Item): string {
   if (item.kind === 'models') {
     const f = lod0(item);
