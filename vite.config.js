@@ -5,7 +5,6 @@ import { devPages } from './site/dev.js';
 // One client entry per page type; each hydrates its prerendered page.
 const entries = {
   catalog: 'site/src/client/catalog.ts',
-  license: 'site/src/client/license.ts',
   model: 'site/src/client/model.ts',
   sky: 'site/src/client/sky.ts',
   material: 'site/src/client/material.ts',

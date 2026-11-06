@@ -11,7 +11,6 @@ import { featured, published, readAll, verifyFiles } from '#lib/server/catalog';
 import { indexJson, llmsTxt, robotsTxt, sitemapXml } from '#lib/server/files';
 import Catalog from './pages/Catalog.svelte';
 import Docs from './pages/Docs.svelte';
-import License from './pages/License.svelte';
 import Missing from './pages/Missing.svelte';
 import ModelPage from './pages/Model.svelte';
 import SkyPage from './pages/Sky.svelte';
@@ -95,7 +94,6 @@ export function outputs(): Output[] {
     ]),
     ...KINDS.map(({ kind }) => ({ path: `/${kind}.json`, file: `${kind}.json`, text: indexJson(kind, all[kind]), type: 'application/json' })),
     { path: '/docs', file: 'docs/index.html', page: () => page(Docs, 'docs', docsExamples(all)) },
-    { path: '/license', file: 'license/index.html', page: () => page(License, 'license', {}) },
     { path: '/404.html', file: '404.html', page: () => page(Missing, 'missing', {}) },
     { path: '/llms.txt', file: 'llms.txt', text: llmsTxt(all), type: 'text/plain; charset=utf-8' },
     { path: '/sitemap.xml', file: 'sitemap.xml', text: sitemapXml(all), type: 'application/xml' },

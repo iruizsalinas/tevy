@@ -138,7 +138,6 @@ const material = new MeshStandardMaterial({ map: color, normalMap: normal, aoMap
 - [Featured](${SITE_URL}/): a selection from every section
 ${KINDS.map((k) => `- [${k.label}](${SITE_URL}/${k.kind}): the catalog, searchable with ?search=<words> (names, categories and tags)\n- [${k.kind}.json](${SITE_URL}/${k.kind}.json): the latest version of every ${k.singular} in one file, sorted by slug; version history in each item's own .json`).join('\n')}
 - [Docs](${SITE_URL}/docs): loading in three.js and other engines, and pinned versus latest versions
-- [License](${SITE_URL}/license): what CC0 1.0 allows
 
 ## Model list
 
@@ -160,7 +159,6 @@ export function sitemapXml(all: Record<Kind, Item[]>): string {
     `  <url><loc>${SITE_URL}/</loc></url>`,
     ...KINDS.filter((k) => all[k.kind].length).map((k) => `  <url><loc>${SITE_URL}/${k.kind}</loc></url>`),
     `  <url><loc>${SITE_URL}/docs</loc></url>`,
-    `  <url><loc>${SITE_URL}/license</loc></url>`,
     ...items.map((m) => `  <url><loc>${SITE_URL}${itemUrl(m)}</loc>${m.updated ? `<lastmod>${m.updated}</lastmod>` : ''}</url>`),
   ];
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join('\n')}\n</urlset>\n`;

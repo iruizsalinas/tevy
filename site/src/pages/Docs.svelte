@@ -1,7 +1,7 @@
 <script lang="ts">
   import Layout from './Layout.svelte';
   import { latestPath } from '#lib/catalog';
-  import { SITE_URL, lod0, type Model } from '#lib/models';
+  import { CC0_URL, SITE_URL, lod0, type Model } from '#lib/models';
   import { mainFile, type Sky } from '#lib/skies';
   import type { Material } from '#lib/materials';
   import {
@@ -72,7 +72,7 @@
       <h1 class="display">Docs</h1>
       <p class="lead">
         Every file on tevy is a plain HTTPS download: no account, no API key, and CORS is open, so a browser can load files straight from
-        tevy.dev. Everything is <a href="/license">CC0</a>.
+        tevy.dev. Everything is <a href={CC0_URL} rel="license">CC0</a>.
       </p>
 
       <section id="agents">
