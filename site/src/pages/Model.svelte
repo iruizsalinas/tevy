@@ -14,11 +14,12 @@
   } from '#lib/models';
   import Icon from '#lib/components/Icon.svelte';
   import Seo from '#lib/components/Seo.svelte';
-  import { firstSentence } from '#lib/catalog';
+  import { firstSentence, itemUrl, type Card } from '#lib/catalog';
   import UseIt from '#lib/components/UseIt.svelte';
   import Viewer from '#lib/components/Viewer.svelte';
 
-  let { model }: { model: Model } = $props();
+  // replacements: the models that replace a deprecated set, as catalog cards.
+  let { model, replacements = [] }: { model: Model; replacements?: Card[] } = $props();
 
   const main = $derived(lod0(model));
   const older = $derived(model.versions.filter((v) => v.version !== model.version));
@@ -62,6 +63,7 @@
 
 <svelte:head>
   <link rel="preload" as="image" href={model.preview} />
+  {#if model.deprecated}<meta name="robots" content="noindex" />{/if}
   {@html `<script type="application/ld+json">${jsonLd}</script>`}
 </svelte:head>
 
@@ -78,6 +80,23 @@
     </nav>
     <h1 class="display">{model.name}</h1>
     <p class="lede">{model.description}</p>
+
+    {#if model.deprecated}
+      <section class="replaced" aria-labelledby="replaced-title">
+        <h2 id="replaced-title">Each piece is its own model now</h2>
+        <p>Every object in this set has its own page and download, so you can load only what you need. These files stay online, so existing links keep working.</p>
+        <ul>
+          {#each replacements as item (item.slug)}
+            <li>
+              <a href={itemUrl(item)}>
+                <img src={item.preview} alt="" width="40" height="40" loading="lazy" decoding="async" />
+                <span>{item.name}</span>
+              </a>
+            </li>
+          {/each}
+        </ul>
+      </section>
+    {/if}
 
     <dl class="specs">
       <div><dt>Triangles</dt><dd class="mono">{main.triangles.toLocaleString('en-US')}</dd></div>
@@ -254,6 +273,49 @@
 
   h2 {
     font-size: 13px;
+  }
+
+  .replaced {
+    padding: 11px 11px 6px;
+    border: 1px solid var(--warn-line);
+    border-radius: var(--radius);
+    background: var(--warn-soft);
+  }
+
+  .replaced p {
+    margin: 4px 0 8px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  .replaced ul {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .replaced a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 3px 4px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .replaced a:hover {
+    background: var(--hover);
+  }
+
+  .replaced img {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
   }
 
   .downloads ul {

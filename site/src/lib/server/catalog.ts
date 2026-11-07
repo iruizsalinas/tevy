@@ -2,7 +2,7 @@
 import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { KINDS, type Item, type Kind } from '#lib/catalog';
+import { KINDS, listed, type Item, type Kind } from '#lib/catalog';
 import { FEATURED } from '../../featured';
 
 const PUBLIC_DIR = resolve('site/public');
@@ -32,12 +32,12 @@ export function readAll(): Record<Kind, Item[]> {
   return Object.fromEntries(KINDS.map(({ kind }) => [kind, readItems(kind)])) as Record<Kind, Item[]>;
 }
 
-/** The featured items in their listed order. Entries that are not published (yet) are skipped. */
+/** The featured items in their listed order. Entries that are not published (yet) or deprecated are skipped. */
 export function featured(all: Record<Kind, Item[]>): Item[] {
   return FEATURED.map((ref) => {
     const [kind, slug] = ref.split('/') as [Kind, string];
     return all[kind]?.find((item) => item.slug === slug);
-  }).filter((item): item is Item => Boolean(item));
+  }).filter((item): item is Item => Boolean(item) && listed(item!));
 }
 
 /**

@@ -1,5 +1,5 @@
 // The generated text files: /<kind>.json, /llms.txt (llmstxt.org format), /sitemap.xml, /robots.txt.
-import { KINDS, itemUrl, type Item, type Kind } from '#lib/catalog';
+import { KINDS, itemUrl, listed, type Item, type Kind } from '#lib/catalog';
 import { SITE_URL, TRANSCODER_URL, categoryLabel, formatBytes, formatDimensions, lod0, type Model } from '#lib/models';
 import { formatLabel, mainFile, type Sky } from '#lib/skies';
 import { materialSets, setLabel, type Material } from '#lib/materials';
@@ -49,7 +49,7 @@ function materialLine(m: Material): string {
 }
 
 export function llmsTxt(all: Record<Kind, Item[]>): string {
-  const models = all.models as Model[];
+  const models = all.models.filter(listed) as Model[];
   const skies = all.skies as Sky[];
   const materials = all.materials as Material[];
   return `# tevy
@@ -62,6 +62,7 @@ export function llmsTxt(all: Record<Kind, Item[]>): string {
 - The site has one section per kind of asset, all with the same shape: ${KINDS.map((k) => `/${k.kind}`).join(', ')}. Each item has a page at /<section>/<slug>, a metadata file next to it, and the section has an index at /<section>.json.
 - Versions: a published file never changes. An improved item gets a new version in a new folder (v2, v3, ...) and older versions stay online, so a site that loads v1 keeps getting the same file. The latest version of every file is also served without the version folder (/models/<slug>/lod0.glb, /skies/<slug>/2k.jpg, /materials/<slug>/color-2k.ktx2, and /<section>/<slug>/preview.webp for the preview image); it changes when a new version ships, so pin the versioned URL for anything you ship. \`version\` in the metadata is the latest; \`versions\` lists every version, newest first, with its date, a note on what changed, and its files.
 - Slugs are permanent identifiers within a section. Categories may change and are not part of any URL.
+- Each model is a single object. Some older models held several objects; each of those objects is now a model of its own. The older model stays online at the same URLs, with \`deprecated: true\` and \`replacedBy\` (the slugs of the new models) in its metadata, and is left out of the catalog and the lists below.
 
 ## Models
 
@@ -154,7 +155,7 @@ ${materials.length ? materials.map(materialLine).join('\n') : 'No materials are 
 }
 
 export function sitemapXml(all: Record<Kind, Item[]>): string {
-  const items = KINDS.flatMap((k) => all[k.kind]);
+  const items = KINDS.flatMap((k) => all[k.kind].filter(listed));
   const urls = [
     `  <url><loc>${SITE_URL}/</loc></url>`,
     ...KINDS.filter((k) => all[k.kind].length).map((k) => `  <url><loc>${SITE_URL}/${k.kind}</loc></url>`),

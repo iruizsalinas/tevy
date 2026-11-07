@@ -2,7 +2,7 @@
 // Used by site/build.mjs at build time and by the dev server in vite.config.js.
 import type { Component } from 'svelte';
 import { render } from 'svelte/server';
-import { KINDS, itemUrl, latestPath, toCard, type Item, type Kind } from '#lib/catalog';
+import { KINDS, itemUrl, latestPath, listed, toCard, type Item, type Kind } from '#lib/catalog';
 import type { Model } from '#lib/models';
 import type { Sky } from '#lib/skies';
 import type { Material } from '#lib/materials';
@@ -48,7 +48,11 @@ function page<P extends Record<string, unknown>>(component: Component<P>, entry:
 const MATERIAL_SKY = 'scattered-cumulus';
 
 function itemPage(item: Item, all: Record<Kind, Item[]>): Page {
-  if (item.kind === 'models') return page(ModelPage, 'model', { model: item });
+  if (item.kind === 'models') {
+    // A deprecated set links to the models that replace it, in the order it lists them.
+    const replacements = (item.replacedBy ?? []).map((slug) => all.models.find((m) => m.slug === slug)).filter((m): m is Item => Boolean(m)).map(toCard);
+    return page(ModelPage, 'model', { model: item, replacements });
+  }
   if (item.kind === 'skies') return page(SkyPage, 'sky', { sky: item });
   const sky = (all.skies.find((s) => s.slug === MATERIAL_SKY) ?? all.skies[0]) as Sky | undefined;
   const lighting = sky ? { path: mainFile(sky).path, exposure: sky.exposure, sun: sky.sun } : null;
@@ -58,7 +62,7 @@ function itemPage(item: Item, all: Record<Kind, Item[]>): Page {
 /** The model, sky and material the docs use in their examples: the first featured of each. */
 function docsExamples(all: Record<Kind, Item[]>) {
   const picks = featured(all);
-  const model = picks.find((i) => i.kind === 'models') ?? all.models[0];
+  const model = picks.find((i) => i.kind === 'models') ?? all.models.filter(listed)[0];
   const sky = picks.find((i) => i.kind === 'skies') ?? all.skies[0] ?? null;
   const material = picks.find((i) => i.kind === 'materials') ?? all.materials[0] ?? null;
   const person = (all.models as Model[]).find((m) => m.animations?.length) ?? null;
@@ -72,17 +76,19 @@ function docsExamples(all: Record<Kind, Item[]>) {
 
 export function outputs(): Output[] {
   const all = readAll();
-  const sections = KINDS.filter((k) => all[k.kind].length);
-  const counts = sections.map((k) => ({ kind: k.kind, count: all[k.kind].length }));
+  // Catalog pages show what is listed; every item, deprecated sets included, keeps its own page and files.
+  const shown = Object.fromEntries(KINDS.map(({ kind }) => [kind, all[kind].filter(listed)])) as Record<Kind, Item[]>;
+  const sections = KINDS.filter((k) => shown[k.kind].length);
+  const counts = sections.map((k) => ({ kind: k.kind, count: shown[k.kind].length }));
   return [
     {
       path: '/',
       file: 'index.html',
       page: () =>
-        page(Catalog, 'catalog', { items: featured(all).map(toCard), everything: sections.flatMap((k) => all[k.kind].map(toCard)), kind: null, sections: counts }),
+        page(Catalog, 'catalog', { items: featured(all).map(toCard), everything: sections.flatMap((k) => shown[k.kind].map(toCard)), kind: null, sections: counts }),
     },
     ...sections.flatMap(({ kind }) => [
-      { path: `/${kind}`, file: `${kind}/index.html`, page: () => page(Catalog, 'catalog', { items: all[kind].map(toCard), kind, sections: counts }) },
+      { path: `/${kind}`, file: `${kind}/index.html`, page: () => page(Catalog, 'catalog', { items: shown[kind].map(toCard), kind, sections: counts }) },
       ...all[kind].map((item) => {
         const path = itemUrl(item);
         return { path, file: `${path.slice(1)}/index.html`, page: () => itemPage(item, all) };

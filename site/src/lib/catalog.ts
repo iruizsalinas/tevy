@@ -53,6 +53,11 @@ export function kindInfo(kind: Kind): KindInfo {
 
 export type Item = (Model & { kind: 'models' }) | (Sky & { kind: 'skies' }) | (Material & { kind: 'materials' });
 
+/** False for a deprecated set: its page and files stay online, but catalogs, search and the sitemap leave it out. */
+export function listed(item: Item): boolean {
+  return !(item.kind === 'models' && item.deprecated);
+}
+
 export function itemUrl(item: Pick<Item, 'kind' | 'slug'>): string {
   return `/${item.kind}/${item.slug}`;
 }

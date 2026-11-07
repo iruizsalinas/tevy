@@ -32,6 +32,10 @@ export interface Model {
   category: string;
   tags?: string[];
   description: string;
+  /** True for a set that was split into separate models. Its page and files stay online, but the catalog leaves it out. */
+  deprecated?: boolean;
+  /** The slugs of the models that replace a deprecated set. */
+  replacedBy?: string[];
   license: string;
   /** The latest version; `files` are its files. */
   version: number;
