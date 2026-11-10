@@ -1,7 +1,7 @@
 // What the home page shows, in this order: "<kind>/<slug>". Items that are not published are skipped.
 // 15 items fill three rows of the widest grid (5 columns); narrower grids show three rows of fewer.
 export const FEATURED: string[] = [
-  'models/castle-keep',
+  'models/fire-extinguisher',
   'models/supercar',
   'models/fire-engine',
   'models/ferris-wheel',
