@@ -22,7 +22,7 @@ const ktx2 = new KTX2Loader()
   .detectSupport(renderer);
 
 const loader = new GLTFLoader().setKTX2Loader(ktx2).setMeshoptDecoder(MeshoptDecoder);
-const gltf = await loader.loadAsync('https://tevy.dev/models/norway-spruce/norway-spruce_lod0.glb');
+const gltf = await loader.loadAsync('https://tevy.dev/models/norway-spruce/lod0.glb');
 scene.add(gltf.scene);
 ```
 
